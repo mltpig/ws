@@ -63,6 +63,7 @@ class ConfigParam
             case 'ZHENGJI_GIFTBAG_FREE_REWARD'://政绩-礼包每日免费奖励
             case 'ZHENGJI_GIFTBAG_PAID_REWARD'://政绩-礼包购买奖励
             case 'BODYCHANGE_ITEM_ID'://修改模型属性消耗
+            case 'OPENSERVICE_SPRINT_RANK_REWARD':// 点赞奖励
                 list($id,$number) = explode('=',$value);
                 $param = ['gid' => $id,'num' => $number];
                 break;
@@ -138,6 +139,8 @@ class ConfigParam
             case 'DREAM_UPGRADE_SPEEDUP_AD_COLD_TIME'://树加速升级CD（秒）
             case 'OPENSERVICE_CELEBRATION_TIME_LIMIT'://开服庆典结束周期（秒）
             case 'OPENSERVICE_CELEBRATION_RESET_ITEM'://开服庆典积分ID
+            case 'OPENSERVICE_SPRINT_TIME_LIMIT'://开服冲榜结束周期（秒）
+            case 'OPENSERVICE_SPRINT_RANK_TIME_LIMIT':// 点赞重置周期（秒）
                 $param = $value;
                 break;
             case 'BORN_REWARD_LIST'://初始仙桃

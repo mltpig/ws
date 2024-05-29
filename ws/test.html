@@ -8,6 +8,8 @@
 <body>
 <div style="margin: 100px auto;width:1000px;height:300px;border:0px dashed #000;">
 
+	<button type="button" id="gotoAround">前往周围福地</button>
+	<br>
 	<button type="button" id="mdsAdd">米大师-赠送余额</button>
 	<br>
 	<button type="button" id="getFirstRechargeReward">获取首冲配置</button>
@@ -180,7 +182,7 @@
 
 <script type="text/javascript">
 
-	var url	= 'wss://dev.shenzhenyuren.com/wydzg_yzy_iap?code=oY1Oa607FG-8cMUeCJ3gh7Z3S0fg&node=7&scene=aaaa';
+	var url	= 'ws://192.168.3.9/wydzg_iap?code=2&node=6&scene=aaaa';
 	var ws  = new WebSocket(url);
 	//建立连接
 	ws.onopen = function(msg){
@@ -216,6 +218,7 @@
 
 	$('#createPayOrder').on('click',function(){
 		sendParam["method"]   	= 'createPayOrder'
+		sendParam["device"] 	= '100000000'
 		sendParam["rechargeId"] = '100000000'
 		sendParam["sign"]	  	= createSign(sendParam,123456789);
 		sendMsg(sendParam);
@@ -883,6 +886,13 @@
 		sendParam["method"]   = 'mdsAdd'
 		sendParam["sign"]	  = createSign(sendParam,123456789);
 		sendParam["num"]      = 1000;
+		sendMsg(sendParam);
+	})
+
+	$('#gotoAround').on('click',function(){
+		sendParam["method"]   = 'gotoAround'
+		sendParam["sign"]	  = createSign(sendParam,123456789);
+		sendParam["rid"]      = '123456789';
 		sendMsg(sendParam);
 	})
 

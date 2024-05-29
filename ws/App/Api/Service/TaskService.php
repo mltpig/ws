@@ -10,6 +10,21 @@ class TaskService
     use CoroutineSingleTon;
 
 
+    public function dailyReset(PlayerService $playerSer):void
+    {
+        //TODO：需优化通过配置表refresh参数以日周月重置
+        
+        $resetVal = [78];
+        $task102 = ConfigTask::getInstance()->getXianYuanInitTask();
+        foreach($task102 as $taskid => $detail)
+        {
+            if(in_array($detail['complete_type'],$resetVal)){
+                $playerSer->setTask($taskid,0,0,'set');
+                $playerSer->setTask($taskid,1,0,'set');
+            }
+        }
+    }
+
     //Admin:
     //1=主线
     //2=关卡章节奖励
@@ -54,16 +69,18 @@ class TaskService
         //53=灵兽上阵N次
         //54=灵兽升级N次
         //57=升级精怪N次
+        //63=福地采集他人N次
         //67=福地累计采集N次
         //69=合成精怪N次
         //71=分解N件装备
         //76=完成仙友游历N次
         //77=进行N次挑战妖王
+        //78=座驾升级N次（每日可重置）
         //1001=活动期间累计登录N天
         //1002=在坊市累计购买N个道具
         //1003=活动期间累计观看N个视频
 
-        $incrVal = [2,28,29,31,34,36,39,41,45,51,53,54,57,67,69,71,76,77,1001,1002,1003];
+        $incrVal = [2,28,29,31,34,36,39,41,45,51,53,54,57,63,67,69,71,76,77,78,1001,1002,1003];
         foreach ($configs as $taskid => $config) 
         {
             //达成任务不再判断

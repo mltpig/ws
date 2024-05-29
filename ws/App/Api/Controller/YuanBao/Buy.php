@@ -43,6 +43,7 @@ class Buy extends BaseController
                     'list'     => ShopService::getInstance()->getShowList($this->player,10),
                     'reward'   => $goodsList,
                     'ticket'   => $payRes['balance'],
+                    'sequence' => $param['sequence'],
                 ];
             }
         } catch (\Throwable $th) {

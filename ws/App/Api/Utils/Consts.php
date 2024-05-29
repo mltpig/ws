@@ -162,4 +162,12 @@ class Consts
     const TREE_SPEED_UP_CD_TIME = 203; // 树(军旗)等级加速冷却
 
     // 105048 开服庆典累计积分
+
+    // 204 - 220 为运营活动
+    const XIANYUAN_GIFT_ID = 204; // 仙缘活动ID
+    const SHANGGU_GIFT_ID   = 205;// 商贾活动ID
+
+    const LIKE_RNAK_STATE_1 = 221; // 开服冲榜点赞状态（每日重置 第一名）
+    const LIKE_RNAK_STATE_2 = 222; // 开服冲榜点赞状态（每日重置 第二名）
+    const LIKE_RNAK_STATE_3 = 223; // 开服冲榜点赞状态（每日重置 第三名）
 }

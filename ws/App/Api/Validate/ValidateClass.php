@@ -88,14 +88,23 @@ class ValidateClass
         "getSignInReward"      => "\\App\\Api\\Validate\\Activity\\SignIn\\Get",
         "receiveSignInReward"  => "\\App\\Api\\Validate\\Activity\\SignIn\\Receive",
 
-        "getParadiseInfo"       => "\\App\\Api\\Validate\\Paradise\\Get",
-        "paradiseCollectGoods"  => "\\App\\Api\\Validate\\Paradise\\CollectGoods",
-        "paradiseRefreshGoods"  => "\\App\\Api\\Validate\\Paradise\\RefreshGoods",
-        "paradiseAdRefreshGoods"  => "\\App\\Api\\Validate\\Paradise\\AdRefreshGoods",
+        "getParadiseInfo"       => "\\App\\Api\\Validate\\Paradise\\Self\\Get",
+        "paradiseCollectGoods"  => "\\App\\Api\\Validate\\Paradise\\Self\\CollectGoods",
+        "paradiseRefreshGoods"  => "\\App\\Api\\Validate\\Paradise\\Self\\RefreshGoods",
+        "paradiseAdRefreshGoods"  => "\\App\\Api\\Validate\\Paradise\\Self\\AdRefreshGoods",
         "paradiseCollectGoodsRevokeById" => "\\App\\Api\\Validate\\Paradise\\CollectGoodsRevokeById",
         "paradiseCollectGoodsRevokeByWorker" => "\\App\\Api\\Validate\\Paradise\\CollectGoodsRevokeByWorker",
         "paradiseCollectRecord" => "\\App\\Api\\Validate\\Paradise\\CollectRecord",
-        "paradiseWorkerAdd" => "\\App\\Api\\Validate\\Paradise\\WorkerAdd",
+        "paradiseWorkerAdd" => "\\App\\Api\\Validate\\Paradise\\Self\\WorkerAdd",
+
+        "getParadiseAroundList" => "\\App\\Api\\Validate\\Paradise\\Around\\Get",
+        "getAroundPlayerInfo" => "\\App\\Api\\Validate\\Paradise\\Around\\Info",
+        "aroundCollectGoods" => "\\App\\Api\\Validate\\Paradise\\Around\\CollectGoods",
+        "refreshParadiseAround" => "\\App\\Api\\Validate\\Paradise\\Around\\Refresh",
+        "paradiseExitAround" => "\\App\\Api\\Validate\\Paradise\\Around\\ExitRoom",
+
+        "gotoAround" => "\\App\\Api\\Validate\\Paradise\\GotoAround",
+
 
         "getComradeInfo"    => "\\App\\Api\\Validate\\Dongfu\\Comrade\\Get",
         "unlockComrade"    => "\\App\\Api\\Validate\\Dongfu\\Comrade\\Unlock",
@@ -232,8 +241,13 @@ class ValidateClass
         "openCelebraScheduleTask"   => "\\App\\Api\\Validate\\Activity\\OpenCelebra\\ScheduleTask",
         "openCelebraBuyGift"        => "\\App\\Api\\Validate\\Activity\\OpenCelebra\\BuyGift",
 
+        "getOpenRank"            => "\\App\\Api\\Validate\\Activity\\OpenRank\\Get",
+        "getOpenRankLike"        => "\\App\\Api\\Validate\\Activity\\OpenRank\\GetLike",
+        "likeOpenRank"           => "\\App\\Api\\Validate\\Activity\\OpenRank\\Like",
+
         "createPayOrder"    => "\\App\\Api\\Validate\\Pay\\Wx\\Order",
         "queryPayOrder"     => "\\App\\Api\\Validate\\Pay\\Wx\\Query",
+        "testPushPayOrder"     => "\\App\\Api\\Validate\\Ext\\OrderPush",
     );
 
     public function getPath(string $method):string

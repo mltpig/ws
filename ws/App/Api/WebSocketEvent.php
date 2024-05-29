@@ -1,14 +1,11 @@
 <?php 
 namespace App\Api;
+
+use App\Api\Service\Gm\BacklistService;
 use EasySwoole\Component\TableManager;
+use App\Api\Service\Http\HttpService;
 use App\Api\Service\Node\NodeService;
-use App\Api\Service\Node\ServerService;
 use App\Api\Service\PlayerService;
-use App\Api\Service\Pay\PaySuccessCallBackService;
-use App\Api\Service\Pay\Wx\Ios\OffiAccountService;
-use App\Api\Service\Pay\Wx\Ios\PayCallBackService;
-use App\Api\Service\Pay\Wx\MessageService as WxMessageService;
-use App\Api\Table\Table;
 use EasySwoole\EasySwoole\ServerManager;
 
 class WebSocketEvent
@@ -23,46 +20,7 @@ class WebSocketEvent
             return;
         }
 
-        $reMsg = '200';
-
-        $get = $request->get ? $request->get : [];
-
-        switch ($pathInfo) 
-        {
-            case '/'.CHANNEL.'/clearTable':
-                Table::getInstance()->reset();
-                break;
-            case '/'.CHANNEL.'/openServer':
-                $reMsg = NodeService::getInstance()->openNewServer($get);
-                break;
-            case '/'.CHANNEL.'/exitGame':
-                $reMsg = ServerService::getInstance()->exitGame($get);
-                break;
-            case '/'.CHANNEL.'/payNotify':
-                $method = $request->server['request_method'];
-                if($method === 'GET')
-                {
-                    $reMsg = PaySuccessCallBackService::getInstance()->check($get);
-                }elseif($method === 'POST'){
-                    $reMsg = PaySuccessCallBackService::getInstance()->payCallBack( $request );
-                }
-                break;
-            case '/'.CHANNEL.'/message':
-                $method = $request->server['request_method'];
-                if($method === 'GET')
-                {
-                    $reMsg = WxMessageService::getInstance()->firstCheck($get);
-                }elseif($method === 'POST'){
-                    $reMsg = WxMessageService::getInstance()->run( $request );
-                }
-                break;
-            case '/'.CHANNEL.'/jsapi':
-                $reMsg = OffiAccountService::getInstance()->run($get);
-                break;
-            case '/'.CHANNEL.'/pay_success_jsapi':
-                $reMsg = PayCallBackService::getInstance()->run( $request->getContent() );
-                break;
-        }
+        $reMsg = HttpService::getInstance()->run( $request );
 
         $response->header('Content-type', 'text/html;charset=utf-8');
         $response->write($reMsg);
@@ -73,7 +31,7 @@ class WebSocketEvent
     {   
         //统计wss 连接数
         $get = $request->get;
-        $fd   = $request->fd;
+        $fd  = $request->fd;
 
         if(!array_key_exists('code',$get) || !$get['code'] || !NodeService::getInstance()->isLogin($get['code'])) return $server->close($fd);
         if(!array_key_exists('scene',$get) || !$get['scene'] || strlen($get['scene']) != 4 ) return $server->close($fd);
@@ -81,6 +39,13 @@ class WebSocketEvent
         
         $site = $get['node'];
         $uid  = $get['code'];
+        
+        if(BacklistService::getInstance()->get($uid))
+        {
+            $server->push($fd,json_encode( ['code' => BLACK_LIST,'msg' => '您已被禁止登陆，详情请联系客服'] ,JSON_UNESCAPED_UNICODE|JSON_FORCE_OBJECT));
+            $server->close($fd);
+        }
+
 
         $old = TableManager::getInstance()->get(TABLE_UID_FD)->get($uid);
         if($old)
@@ -102,7 +67,7 @@ class WebSocketEvent
         //放在最后面，等待colse回调执行完毕
         TableManager::getInstance()->get(TABLE_FD_UID)->set($fd,[ 'uid' => $uid ,'site' => $site]);
         TableManager::getInstance()->get(TABLE_UID_FD)->set($uid,[ 'fd' => $fd,'scene' => $get['scene'] ]);
-
+  
     }
 
     public static function onClose(\swoole_server $server, int $fd, int $reactorId)

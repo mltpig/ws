@@ -156,6 +156,65 @@
             "install-path": "../dragonmantank/cron-expression"
         },
         {
+            "name": "easyswoole/actor",
+            "version": "2.0.7",
+            "version_normalized": "2.0.7.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/easy-swoole/actor.git",
+                "reference": "4b76c4288eae0cb3f91fef4f6bd825481a687749"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/easy-swoole/actor/zipball/4b76c4288eae0cb3f91fef4f6bd825481a687749",
+                "reference": "4b76c4288eae0cb3f91fef4f6bd825481a687749",
+                "shasum": ""
+            },
+            "require": {
+                "easyswoole/component": ">=1.0",
+                "easyswoole/spl": "^1.1",
+                "easyswoole/trigger": "^1.0",
+                "easyswoole/utility": "^1.0",
+                "ext-swoole": "^4.4.0",
+                "php": ">=7.1.0"
+            },
+            "require-dev": {
+                "easyswoole/swoole-ide-helper": "^1.2"
+            },
+            "time": "2023-11-14T05:17:17+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "EasySwoole\\Actor\\": "src/",
+                    "EasySwoole\\Actor\\Test\\": "test/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "YF",
+                    "email": "291323003@qq.com"
+                }
+            ],
+            "description": "easyswoole component",
+            "homepage": "https://www.easyswoole.com/",
+            "keywords": [
+                "async",
+                "easyswoole",
+                "framework",
+                "swoole"
+            ],
+            "support": {
+                "issues": "https://github.com/easy-swoole/actor/issues",
+                "source": "https://github.com/easy-swoole/actor/tree/2.0.7"
+            },
+            "install-path": "../easyswoole/actor"
+        },
+        {
             "name": "easyswoole/annotation",
             "version": "2.0.3",
             "version_normalized": "2.0.3.0",

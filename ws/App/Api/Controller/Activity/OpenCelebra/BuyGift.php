@@ -18,31 +18,44 @@ class BuyGift extends BaseController
         $result   = '购买礼包今日已上限';
         if($config['buy_limit'] > $this->player->getArg($param['id']) )
         {
-            $discount =  mul(ConfigParam::getInstance()->getFmtParam('DISCOUNT'),$config['price']['num']);
-            try {
-                $result = '余额不足';
-                $balance = TicketService::getInstance($this->player)->getBalance();
-                $reward = $goodsList = [];
-                if($balance >= $discount)
-                {
-                    $payRes = TicketService::getInstance()->pay( $discount );
+            if($config['price']['num'] == 0)
+            {   
+                $reward = [];
+                $reward = $config['reward'];
+                $this->player->goodsBridge($reward,'免费开服庆典礼包');
 
-                    $reward  = $goodsList = $config['reward'];
-                    $reward[] = ['gid' => 105047,'num' => -$discount,'type' => GOODS_TYPE_1 ];
-                        
-                    $desc = '购买开服庆典礼包'.$payRes['bill_no'].' '.$balance.' =>'.$payRes['balance'];
-                    $this->player->goodsBridge($reward,'扣除券',$desc);
-
-                    $this->player->setArg($param['id'],1,'add');
-
-                    $result = [
-                        'open_celebra' => OpenCelebraService::getInstance()->getOpenCelebraFmtData($this->player),
-                        'reward'   => $goodsList,
-                        'ticket'   => $payRes['balance'],
-                    ];
+                $this->player->setArg($param['id'],1,'add');
+                $result = [
+                    'open_celebra' => OpenCelebraService::getInstance()->getOpenCelebraFmtData($this->player),
+                    'reward'   => $reward,
+                ];
+            }else{
+                $discount =  mul(ConfigParam::getInstance()->getFmtParam('DISCOUNT'),$config['price']['num']);
+                try {
+                    $result = '余额不足';
+                    $balance = TicketService::getInstance($this->player)->getBalance();
+                    $reward = $goodsList = [];
+                    if($balance >= $discount)
+                    {
+                        $payRes = TicketService::getInstance()->pay( $discount );
+    
+                        $reward  = $goodsList = $config['reward'];
+                        $reward[] = ['gid' => 105047,'num' => -$discount,'type' => GOODS_TYPE_1 ];
+                            
+                        $desc = '购买开服庆典礼包'.$payRes['bill_no'].' '.$balance.' =>'.$payRes['balance'];
+                        $this->player->goodsBridge($reward,'扣除券',$desc);
+    
+                        $this->player->setArg($param['id'],1,'add');
+    
+                        $result = [
+                            'open_celebra' => OpenCelebraService::getInstance()->getOpenCelebraFmtData($this->player),
+                            'reward'   => $goodsList,
+                            'ticket'   => $payRes['balance'],
+                        ];
+                    }
+                } catch (\Throwable $th) {
+                    $result = $th->getMessage();
                 }
-            } catch (\Throwable $th) {
-                $result = $th->getMessage();
             }
         }
         $this->sendMsg( $result );

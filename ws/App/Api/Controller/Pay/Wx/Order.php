@@ -15,14 +15,17 @@ class Order extends BaseController
     public function index()
     {
         $rechargeid  = $this->param['rechargeId'];
+        $device      = $this->param['device'];
 
         $result = '无效的充值ID';
         $config = ConfigPaid::getInstance()->getOne($rechargeid);
         if($config)
         {
             $openid = $this->player->getData('openid');
+
+            $prixe = $device === 'ios' ? 'wx-ysj' : '';
             $orderInfo = [
-                'order_id'    => strval(SnowFlake::make(rand(0,31),rand(0,127))),
+                'order_id'    => $prixe .SnowFlake::make(rand(0,31),rand(0,127)),
                 'recharge_id' => $rechargeid,
                 'openid'      => $openid,
                 'site'        => $this->player->getData('site'),

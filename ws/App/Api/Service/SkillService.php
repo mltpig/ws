@@ -220,6 +220,12 @@ class SkillService
             //30013  每隔$b个回合释放1次战技，攻击造成角色攻击力%a伤害。
             //30023  每隔$b个回合释放1次战技，攻击造成角色攻击力%a伤害。
             case '30013':
+                //特殊处理成多段伤害
+                if ($value < $petSkill['c']) {
+                    $value = $petSkill['c'];
+                }
+                $tmp['shanghaiData'] = ['type' => [], '_val' => $value ,'multi' =>['step'=>$petSkill['c'], 'last'=>strval($petSkill['d'])]];
+                break;
             case '30023':
                 $tmp['shanghaiData'] = ['type' => [], '_val' => $value];
                 break;
@@ -616,6 +622,7 @@ class SkillService
                     break;
                 case 15://被攻击
                     //生命值低于%c时
+                    if (!$selfDetail) continue 2;//如果異獸入侵我方已經結束
                     if ($selfDetail['hp'] > div($skillParam['c'] * $selfDetail['hp_max'], 1000)) {
                         unset($skillList['id']);
                         continue 2;

@@ -1,6 +1,6 @@
 <?php
 namespace App\Api\Controller\Paradise;
-use App\Api\Service\ParadisService;
+use App\Api\Service\Module\ParadisService;
 use App\Api\Controller\BaseController;
 
 

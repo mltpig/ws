@@ -12,6 +12,7 @@ use App\Api\Service\Module\FundService;
 use App\Api\Service\Module\MonthlyCardService;
 use App\Api\Service\Module\XianYuanService;
 use App\Api\Service\Module\ShangGuService;
+use App\Api\Service\Module\OpenCelebraService;
 use App\Api\Service\ShopService;
 use App\Api\Table\Activity\SignIn;
 use App\Api\Utils\Keys;
@@ -56,6 +57,7 @@ class RedPointService
         list($magicDraw,$magicUp,$magicStage,$magicIh)      = MagicService::getInstance()->getMagicRedPointInfo($playerSer);
         list($fundLv,$fundgk,$fundJq,$fundDq)               = FundService::getInstance()->getFundRedPointInfo($playerSer);
         list($xianyuanTask,$xianyuanFund,$xianyuanSign,$xianyuanGiftFree,$xianyuanGiftTask) = XianYuanService::getInstance()->getXianYuanRedPointInfo($playerSer);
+        list($openCelebraScheduleTask,$openCelebraTask,$openCelebraStatus) = OpenCelebraService::getInstance()->getOpenCelebraRedPointInfo($playerSer);
 
         return [
             'activityFirstRecharge'         => $this->getFirstRecharge($playerSer),
@@ -109,6 +111,9 @@ class RedPointService
             'xianyuanGiftTask'              => $xianyuanGiftTask,
             'shangguSign'                   => ShangGuService::getInstance()->getShangGuRedPointInfo($playerSer),
             'shopOverFlow'                  => ShopService::getInstance()->getShopRedPointInfo($playerSer),
+            'openCelebraScheduleTask'       => $openCelebraScheduleTask,
+            'openCelebraTask'               => $openCelebraTask,
+            'openCelebraStatus'             => $openCelebraStatus
         ];
     }
 
@@ -284,6 +289,8 @@ class RedPointService
     {
         $task = $playerSer->getData('task');
         $id   = TaskService::getInstance()->getAdminTask( $task,2 );
+
+        if($id == 0) return false;//防止因为id为0导致报错
         
         return $task[$id][1] == 1;
     }

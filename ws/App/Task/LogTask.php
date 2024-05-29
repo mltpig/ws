@@ -39,7 +39,7 @@ class LogTask implements TaskInterface
                     ];
                     $redis->lPush($cahceKey,json_encode($log));
                 } catch (\Throwable $th) {
-                    var_dump($detail['scene'].' '.$detail['desc']);
+                    var_dump($th->getMessage().' : '.$detail['scene'].' '.$detail['desc']);
                 }
             }
         });

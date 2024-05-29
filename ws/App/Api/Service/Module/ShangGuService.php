@@ -2,12 +2,10 @@
 namespace App\Api\Service\Module;
 
 use App\Api\Service\PlayerService;
+use App\Api\Service\Node\NodeService;
 use App\Api\Utils\Consts;
 use App\Api\Table\ConfigParam;
 use App\Api\Table\Activity\ConfigActivityDaily;
-use EasySwoole\Redis\Redis;
-use EasySwoole\Pool\Manager as PoolManager;
-use App\Api\Utils\Keys;
 use EasySwoole\Component\CoroutineSingleTon;
 
 class ShangGuService
@@ -30,18 +28,31 @@ class ShangGuService
                 7 => 0,
             ]
         ];
+
         $playerSer->setShangGu('',0,$shanggu,'flushall');
     }
 
     public function dailyReset(PlayerService $playerSer):void
     {
-        //开服时间
-        $nodeKey        = Keys::getInstance()->getNodeListKey();
-        $site           = $playerSer->getData('site');
-        $startTimestamp = $this->getOpeningTime($nodeKey, $site);
+        list($begin,$reset,$stopTime) = ConfigService::getInstance()->getActivityShanggu();
+        
+        //任务是否有停止并超过限制时间
+        if($stopTime && time() > $stopTime) return ;
 
         //活动签到重置
-        $this->initSignIn($playerSer,$startTimestamp,ConfigParam::getInstance()->getFmtParam('SHANGGUTOUZI_RESET_TIME') + 0);
+        $this->initSignIn($playerSer,$begin,$reset);
+    }
+
+    public function check(PlayerService $playerSer):void
+    {
+        list($begin,$reset,$stopTime,$matchid) = ConfigService::getInstance()->getActivityShanggu();
+
+        if($matchid == $playerSer->getArg(Consts::SHANGGU_GIFT_ID)) return ;
+        
+        $playerSer->setArg(Consts::SHANGGU_GIFT_ID,$matchid,'reset');
+        $this->dailyReset($playerSer);
+        
+
     }
 
     public function initSignIn(PlayerService $playerSer,$startTimestamp,$resetInterval):void
@@ -58,16 +69,14 @@ class ShangGuService
         $shangGuData = $playerSer->getData('shanggu');
 
         //开服时间
-        $nodeKey        = Keys::getInstance()->getNodeListKey();
-        $site           = $playerSer->getData('site');
-        $startTimestamp = $this->getOpeningTime($nodeKey, $site);
-
+        list($begin,$reset) = ConfigService::getInstance()->getActivityShanggu();
+        
         return [
             'signin'    => $this->getSignIn($playerSer),
             'repair'    => $shangGuData['repair'],
             'config'    => [
-                'current_singin'    => $this->checkAndDay($startTimestamp,ConfigParam::getInstance()->getFmtParam('SHANGGUTOUZI_RESET_TIME') + 0),
-                'residue_signin'    => $this->checkResidueTime($startTimestamp,ConfigParam::getInstance()->getFmtParam('SHANGGUTOUZI_RESET_TIME') + 0),
+                'current_singin'    => $this->checkAndDay($begin,$reset),
+                'residue_signin'    => $this->checkResidueTime($begin,$reset),
                 'buy_sign_state'    => $playerSer->getArg(Consts::SHANGGU_SIGNIN_GIFT),
             ],
         ];
@@ -77,12 +86,7 @@ class ShangGuService
     {
         $shangGuData = $playerSer->getData('shanggu');
 
-        $nodeKey        = Keys::getInstance()->getNodeListKey();
-        $site           = $playerSer->getData('site');
-        $startTimestamp = PoolManager::getInstance()->get('redis')->invoke(function (Redis $redis) use ($nodeKey,$site) {
-            return $redis->hGet($nodeKey, $site);
-        });
-        $resetInterval  = ConfigParam::getInstance()->getFmtParam('SHANGGUTOUZI_RESET_TIME') + 0;
+        list($begin,$reset) = ConfigService::getInstance()->getActivityShanggu();
 
         $config = ConfigActivityDaily::getInstance()->getOne(2);
         $sign   = [];
@@ -91,7 +95,7 @@ class ShangGuService
             $index          = $key + 1;
             $sign[$index]   = ['freeReward' => 0, 'paidReward' => 0];
 
-            $day = $this->checkAndDay($startTimestamp,$resetInterval);
+            $day = $this->checkAndDay($begin,$reset);
             if($day >= $index)
             {
                 $sign[$index] = ['freeReward' => 1, 'paidReward' => 0];
@@ -164,35 +168,37 @@ class ShangGuService
     function checkResidueTime($startTimestamp, $resetInterval) {
         $startTimestamp   = strtotime(date('Y-m-d',$startTimestamp));
         $currentTimestamp = time();
+        if($startTimestamp > $currentTimestamp) return 0;
         $timeElapsed = $currentTimestamp - $startTimestamp; // 活动开始时间与当前时间的时间差
         $timeSinceLastReset = $timeElapsed % $resetInterval; // 距离上次重置的时间差
         return $resetInterval - $timeSinceLastReset;
     }
 
-    function getOpeningTime($nodeKey, $site){
-        //开服时间
-        $startTimestamp = PoolManager::getInstance()->get('redis')->invoke(function (Redis $redis) use ($nodeKey,$site) {
-            return $redis->hGet($nodeKey, $site);
-        });
-        $startTimestamp = strtotime('+8 days',$startTimestamp);
-        return $startTimestamp;
-    }
 
     public function getShangGuRedPointInfo(PlayerService $playerSer)
     {
         $red            = false;
-        $shangGuSignIn  =  $this->getSignIn($playerSer);
+        $shangGuSignIn  = $this->getSignIn($playerSer);
 
-        $nodeKey        = Keys::getInstance()->getNodeListKey();
-        $site           = $playerSer->getData('site');
-        $startTimestamp = $this->getOpeningTime($nodeKey, $site);
+        list($begin,$reset) = ConfigService::getInstance()->getActivityShanggu();
         
-        $isDay          = $this->checkAndDay($startTimestamp,ConfigParam::getInstance()->getFmtParam('SHANGGUTOUZI_RESET_TIME') + 0);
+        $isDay          = $this->checkAndDay($begin,$reset);
         if(isset($shangGuSignIn[$isDay]))
         {
             if($shangGuSignIn[$isDay]['freeReward'] == 1 || $shangGuSignIn[$isDay]['paidReward'] == 1) $red = true;
         }
 
         return $red;
+    }
+
+    public function getShowStatus():array
+    {
+        list($begin,$reset,$stopTime) = ConfigService::getInstance()->getActivityShanggu();
+
+        return [ 
+            'begin'  => intval($begin),
+            'end'    => intval($stopTime),
+            'remain' => $this->checkResidueTime($begin,$reset)
+        ]; 
     }
 }

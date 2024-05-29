@@ -75,9 +75,6 @@ class Buy extends BaseController
                                 
                                 $costList = [ [ 'type' => GOODS_TYPE_1,'gid' => $costGid,'num' => -$costTotal ] ];
                                 $this->player->goodsBridge( array_merge($reward,$costList),'商城购买',$shopid);
-
-                                $this->player->goodsBridge($reward,'商城购买',$shopid);
-        
                                 $result = [
                                     'reward' => $reward,
                                     'list'   => ShopService::getInstance()->getShowList($this->player,11),

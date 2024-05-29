@@ -23,11 +23,8 @@ class MdsAdd  extends BaseController
 
             try {
                 // $result = VoucherService::getInstance($openid,$site)->getBalance();
-                // var_dump($result);
                 $result = TicketService::getInstance($this->player)->present($this->param['num']);
-                // var_dump($result);
                 // $result = VoucherService::getInstance()->pay(20);
-                // var_dump($result);
                 $result = [ 'ticket' => $result];
 
             } catch (\Throwable $th) {

@@ -1,9 +1,7 @@
 <?php
 namespace App\Api\Controller\Paradise\Around;
-use App\Api\Table\ConfigParam;
-use App\Api\Utils\Consts;
 use App\Api\Controller\BaseController;
-use App\Api\Service\ParadisService;
+use App\Api\Service\Actor\PlayerActorService;
 
 //刷新自己物资
 class Refresh extends BaseController
@@ -12,23 +10,12 @@ class Refresh extends BaseController
     public function index()
     {
 
-        $time = $this->player->getArg(Consts::HOMELAND_TARGET_REFRESH_TIME);
-        $result = '当前时间未冷却';
-        if(!$time)
-        {
-            $timeLen = ConfigParam::getInstance()->getFmtParam('HOMELAND_TARGET_REFRESH_TIME'); 
+        $uid   = $this->player->getData('openid');
+        $site  = $this->player->getData('site');
 
-            $this->player->setArg(Consts::HOMELAND_TARGET_REFRESH_TIME, time() + $timeLen,'reset');
+        $actorId = PlayerActorService::getInstance()->getAcrotId($uid,$site);
 
-            $new = ParadisService::getInstance()->getAroundList(3);
-    
-            $this->player->setParadise('around','pos','refresh',$new,'set');
-    
-            $around  = $this->player->getData('paradise','around');
-            $workers = $this->player->getData('paradise','worker')['list'];
-
-            $result =  [ 'list' => ParadisService::getInstance()->getAroundInfo($around,$workers) ];
-        }
+        $result  = PlayerActorService::getInstance()->send($actorId,'refreshParadiseAround', $this->param );
 
 
         $this->sendMsg($result );

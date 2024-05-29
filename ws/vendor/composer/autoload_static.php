@@ -7,11 +7,11 @@ namespace Composer\Autoload;
 class ComposerStaticInitc2814027441084bff779e3a6e0529edd
 {
     public static $files = array (
-        '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
-        '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
-        '253c157292f75eb38082b5acb06f3f01' => __DIR__ . '/..' . '/nikic/fast-route/src/functions.php',
-        '538ca81a9a966a6716601ecf48f4eaef' => __DIR__ . '/..' . '/opis/closure/functions.php',
         'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
+        '253c157292f75eb38082b5acb06f3f01' => __DIR__ . '/..' . '/nikic/fast-route/src/functions.php',
+        '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
+        '538ca81a9a966a6716601ecf48f4eaef' => __DIR__ . '/..' . '/opis/closure/functions.php',
+        '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -80,6 +80,8 @@ class ComposerStaticInitc2814027441084bff779e3a6e0529edd
             'EasySwoole\\Command\\' => 19,
             'EasySwoole\\Bridge\\' => 18,
             'EasySwoole\\Annotation\\' => 22,
+            'EasySwoole\\Actor\\Test\\' => 22,
+            'EasySwoole\\Actor\\' => 17,
         ),
         'D' => 
         array (
@@ -279,6 +281,14 @@ class ComposerStaticInitc2814027441084bff779e3a6e0529edd
         'EasySwoole\\Annotation\\' => 
         array (
             0 => __DIR__ . '/..' . '/easyswoole/annotation/src',
+        ),
+        'EasySwoole\\Actor\\Test\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/easyswoole/actor/test',
+        ),
+        'EasySwoole\\Actor\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/easyswoole/actor/src',
         ),
         'Doctrine\\Instantiator\\' => 
         array (

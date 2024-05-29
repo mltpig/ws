@@ -71,8 +71,45 @@ class Keys
         return "five_star:".$openid;
     }
 
-    public function getLastLoginNodeKey(string $openid):string
+    public function getLastLoginNodeKey():string
     {
         return "last:login";
+    }
+    public function getBacklistKey():string
+    {
+        return "status:backlist";
+    }
+    public function getActivityName(string $name):string
+    {
+        return 'config:activity:'.$name;
+    }
+    public function getOpenRankName():string
+    {   
+        return "open_celebration";
+    }
+
+    public function getCreateActorHashKey():string
+    {
+        return "actor:create";
+    }
+
+    public function getPlayerActorHashKey(int $node):string
+    {
+        return "actor:player:".$node;
+    }
+
+    public function getParadisActiveKey(int $node):string
+    {
+        return "paradis:active:".$node;
+    }
+
+    public function getShowSiteRank(int $node):string
+    {
+        return "show:rank:".$node;
+    }
+
+    public function getLikeSiteRank(int $node):string
+    {
+        return "like:rank:".$node;
     }
 }

@@ -13,7 +13,7 @@ class AchievementRank extends BaseController
         $floor  = $this->param['floor'];
 
         $secret_tower_rank_key = RANK_SECRET_TOWER.$floor;
-        $worldInfo = RankService::getInstance()->getSecretTowerRankInfo($secret_tower_rank_key,$site);
+        $worldInfo = RankService::getInstance()->getUaSortRankInfo($secret_tower_rank_key,$site);
 
         $this->sendMsg( [
             'world' => SecretTowerService::getInstance()->getRankPlayerInfo($worldInfo,$site),

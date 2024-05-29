@@ -47,17 +47,19 @@ class PayCallBackService
 
             if( $orderObj->state ) return json_encode(["return_code" => 0,"return_msg" => "OK"],273);
 
-            $rewardNum = $config['repeat_reward']['num'];
-
-            $balance = VoucherService::getInstance($orderObj['openid'],$orderObj['site'])->present($rewardNum);
-
             $orderObj->update([
                 'channe_order' => $param['transaction_id'],
                 'state'        => 1,
                 'update_time'  => date('Y-m-d H:i:s'),
             ]);
 
-            $this->ding($orderObj['openid'],$orderObj['site'],$rewardNum,$balance);
+            $rewardNum = $config['repeat_reward']['num'];
+
+            $balance = VoucherService::getInstance($orderObj['openid'],$orderObj['site'])->present($rewardNum);
+
+            $orderObj->update(['state' => 2 ]);
+
+            $this->ding($orderObj['openid'],$orderObj['site'],$rewardNum,$balance,$orderObj->toArray());
 
             return json_encode(["return_code" => 0,"return_msg" => "OK"],273);
 
@@ -69,7 +71,7 @@ class PayCallBackService
 
     }
 
-    public function ding(string $openid,string $site,int $rewardNum,int $balance):void
+    public function ding(string $openid,string $site,int $rewardNum,int $balance,$orderInfo):void
     {
         $fdInfo = TableManager::getInstance()->get(TABLE_UID_FD)->get($openid);
         if(!$fdInfo) return;
@@ -86,13 +88,18 @@ class PayCallBackService
         } 
 
         try {
-            
+            $config = ConfigPaid::getInstance()->getOne($orderInfo['recharge_id']);
             $data = [
                 'code'=> SUCCESS,
                 'method'=>'pay_success',
-                'data'=> [ 
-                    'ticket'    => $balance,
-                    'rewardNum' => $rewardNum,
+                'data'=> [
+                   // 'rewardNum' => $rewardNum,
+                    'ticket' => $balance,
+                    'rechargeId' => $orderInfo['recharge_id'],
+                    'num' => $config['repeat_reward']['num'],
+                    'buyQuantity' => $config['price'],
+                    'currencyType' => 'CNY',
+                    'outTradeNo'=> $orderInfo['order_id'],
                 ]
             ];
     

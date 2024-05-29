@@ -246,6 +246,7 @@ class ConfigTask
                 'name'             => $value['name'],
                 'complete_type'    => $value['complete_type'],
                 'complete_params'  => json_decode($value['complete_params'],true),
+                'rewards'          => json_decode($value['rewards'],true),
             ];
         }
         return $list;

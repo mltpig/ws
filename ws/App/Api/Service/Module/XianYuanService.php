@@ -4,6 +4,7 @@ namespace App\Api\Service\Module;
 use App\Api\Service\PlayerService;
 use App\Api\Service\TaskService;
 use App\Api\Service\ShopService;
+use App\Api\Service\Node\NodeService;
 use App\Api\Utils\Consts;
 use App\Api\Table\ConfigParam;
 use App\Api\Table\ConfigTask;
@@ -11,7 +12,6 @@ use App\Api\Table\Activity\ConfigFund;
 use App\Api\Table\Activity\ConfigActivityDaily;
 use EasySwoole\Redis\Redis;
 use EasySwoole\Pool\Manager as PoolManager;
-use App\Api\Utils\Keys;
 use EasySwoole\Component\CoroutineSingleTon;
 
 class XianYuanService
@@ -40,22 +40,34 @@ class XianYuanService
     public function dailyReset(PlayerService $playerSer):void
     {
         //开服时间
-        $nodeKey        = Keys::getInstance()->getNodeListKey();
-        $site           = $playerSer->getData('site');
-        $startTimestamp = $this->getOpeningTime($nodeKey, $site);
+
+        list($begin,$reset,$stopTime) = ConfigService::getInstance()->getActivityZhengji();
+        
+        //任务是否有停止并超过限制时间
+        if($stopTime && time() > $stopTime) return ;
 
         //每日任务重置
         $this->initTask($playerSer);
         //活动签到重置
-        $this->initSignIn($playerSer,$startTimestamp,ConfigParam::getInstance()->getFmtParam('ZHENGJI_DAILY_RESET_TIME') + 0);
+        $this->initSignIn($playerSer,$begin,$reset);
         //活动进度及道具重置
-        $this->initWelfare($playerSer,$startTimestamp,ConfigParam::getInstance()->getFmtParam('ZHENGJI_FUND_RESET_TIME') + 0);
+        $this->initWelfare($playerSer,$begin,$reset);
         //活动礼包重置
-        $this->initGift($playerSer,$startTimestamp,ConfigParam::getInstance()->getFmtParam('ZHENGJI_GIFTBAG_RESET_TIME') + 0);
+        $this->initGift($playerSer);
+
     }
 
     public function check(PlayerService $playerSer,int $time):void
     {
+        list($begin,$reset,$stopTime,$matchid) = ConfigService::getInstance()->getActivityZhengji();
+
+        if($matchid != $playerSer->getArg(Consts::XIANYUAN_GIFT_ID))
+        {
+            $playerSer->setArg(Consts::XIANYUAN_GIFT_ID,$matchid,'reset');
+            $this->dailyReset($playerSer);
+        } 
+
+
         //每日登录根据配置与当前时间差
         $tasks = TaskService::getInstance()->getTasksByType($playerSer->getData('task'),102);//活动任务
         if(!$tasks)
@@ -94,15 +106,12 @@ class XianYuanService
         }
     }
 
-    public function initGift(PlayerService $playerSer,$startTimestamp,$resetInterval)
+    public function initGift(PlayerService $playerSer)
     {
         $playerSer->setArg(Consts::XIANYUAN_GIFT_FREE_REWARD,0,'unset');
-
-        if($this->checkAndResetActivity($startTimestamp, $resetInterval)){
-            if($playerSer->getArg(Consts::XIANYUAN_GIFT_SCHEDULE) >= 3){ //购买礼包任务进度大于等于3
-                $playerSer->setArg(Consts::XIANYUAN_GIFT_SCHEDULE,0,'unset');
-                $playerSer->setArg(Consts::XIANYUAN_GIFT_REWARD,0,'unset');
-            }
+        if($playerSer->getArg(Consts::XIANYUAN_GIFT_SCHEDULE) >= 3){ //购买礼包任务进度大于等于3
+            $playerSer->setArg(Consts::XIANYUAN_GIFT_SCHEDULE,0,'unset');
+            $playerSer->setArg(Consts::XIANYUAN_GIFT_REWARD,0,'unset');
         }
     }
 
@@ -112,10 +121,7 @@ class XianYuanService
         $xianYuanData = $playerSer->getData('xianyuan');
 
         //开服时间
-        $nodeKey        = Keys::getInstance()->getNodeListKey();
-        $site           = $playerSer->getData('site');
-        $startTimestamp = $this->getOpeningTime($nodeKey, $site);
-
+        list($begin,$reset) =  ConfigService::getInstance()->getActivityZhengji();
         return [
             'task'      => $this->getXianYuanTask($xianYuanTask),
             'welfare'   => $this->getFundGroupData($playerSer,9),
@@ -124,15 +130,18 @@ class XianYuanService
             'gift'      => ShopService::getInstance()->getShowList($playerSer,101),
             'config'    => [
                 'residue_task'      => strtotime("tomorrow") - time(),
-                'residue_welfare'   => $this->checkResidueTime($startTimestamp,ConfigParam::getInstance()->getFmtParam('ZHENGJI_FUND_RESET_TIME') + 0),
-                'residue_signin'    => $this->checkResidueTime($startTimestamp,ConfigParam::getInstance()->getFmtParam('ZHENGJI_DAILY_RESET_TIME') + 0),
-                'residue_gift'      => $this->checkResidueTime($startTimestamp,ConfigParam::getInstance()->getFmtParam('ZHENGJI_GIFTBAG_RESET_TIME') + 0),
-                'current_singin'    => $this->checkAndDay($startTimestamp,ConfigParam::getInstance()->getFmtParam('ZHENGJI_DAILY_RESET_TIME') + 0),
+                'residue_gift'      => strtotime("tomorrow") - time(),
+
+                'residue_welfare'   => $this->checkResidueTime($begin,$reset),
+                'residue_signin'    => $this->checkResidueTime($begin,$reset),
+                'current_singin'    => $this->checkAndDay($begin,$reset),
+
                 'schedule'          => $playerSer->getArg(Consts::XIANYUAN_GIFT_SCHEDULE),
                 'free_reward'       => $playerSer->getArg(Consts::XIANYUAN_GIFT_FREE_REWARD),
                 'task_reward'       => $playerSer->getArg(Consts::XIANYUAN_GIFT_REWARD),
                 'buy_fund_state'    => $playerSer->getArg(Consts::XIANYUAN_FUND_GROUP9),
                 'buy_sign_state'    => $playerSer->getArg(Consts::XIANYUAN_SIGNIN_GIFT),
+                'integral'          => $playerSer->getArg(ConfigParam::getInstance()->getFmtParam('ZHENGJI_GIFTBAG_RESET_ITEM')),
             ],
         ];
     }
@@ -210,13 +219,8 @@ class XianYuanService
     {
         $xianyuanData   = $playerSer->getData('xianyuan');
 
-        $nodeKey        = Keys::getInstance()->getNodeListKey();
-        $site           = $playerSer->getData('site');
-        $startTimestamp = PoolManager::getInstance()->get('redis')->invoke(function (Redis $redis) use ($nodeKey,$site) {
-            return $redis->hGet($nodeKey, $site);
-        });
-        $resetInterval  = ConfigParam::getInstance()->getFmtParam('ZHENGJI_DAILY_RESET_TIME') + 0;
-
+        list($begin,$reset) =  ConfigService::getInstance()->getActivityZhengji();
+        
         $config = ConfigActivityDaily::getInstance()->getOne(1);
         $sign   = [];
         foreach($config['data'] as $key => $value)
@@ -224,7 +228,7 @@ class XianYuanService
             $index          = $key + 1;
             $sign[$index]   = ['freeReward' => 0, 'paidReward' => 0];
 
-            $day = $this->checkAndDay($startTimestamp,$resetInterval);
+            $day = $this->checkAndDay($begin,$reset);
             if($day >= $index)
             {
                 $sign[$index] = ['freeReward' => 1, 'paidReward' => 0];
@@ -294,20 +298,15 @@ class XianYuanService
         }
     }
 
-    function checkResidueTime($startTimestamp, $resetInterval) {
+    function checkResidueTime($startTimestamp, $resetInterval) 
+    {
         $startTimestamp   = strtotime(date('Y-m-d',$startTimestamp));
         $currentTimestamp = time();
-        $timeElapsed = $currentTimestamp - $startTimestamp; // 活动开始时间与当前时间的时间差
+        if($startTimestamp >= $currentTimestamp) return 0;
+
+        $timeElapsed      = $currentTimestamp - $startTimestamp; // 活动开始时间与当前时间的时间差
         $timeSinceLastReset = $timeElapsed % $resetInterval; // 距离上次重置的时间差
         return $resetInterval - $timeSinceLastReset;
-    }
-
-    function getOpeningTime($nodeKey, $site){
-        //开服时间
-        $startTimestamp = PoolManager::getInstance()->get('redis')->invoke(function (Redis $redis) use ($nodeKey,$site) {
-            return $redis->hGet($nodeKey, $site);
-        });
-        return $startTimestamp;
     }
 
     public function getXianYuanRedPointInfo(PlayerService $playerSer):array
@@ -328,12 +327,11 @@ class XianYuanService
         }
 
         $xianYuanSignIn =  $this->getSignIn($playerSer);
+        
+        list($begin,$reset) =  ConfigService::getInstance()->getActivityZhengji();
 
-        $nodeKey        = Keys::getInstance()->getNodeListKey();
-        $site           = $playerSer->getData('site');
-        $startTimestamp = $this->getOpeningTime($nodeKey, $site);
+        $isDay  = $this->checkAndDay($begin,$reset);
 
-        $isDay          = $this->checkAndDay($startTimestamp,ConfigParam::getInstance()->getFmtParam('ZHENGJI_DAILY_RESET_TIME') + 0);
         if($xianYuanSignIn[$isDay]['freeReward'] == 1 || $xianYuanSignIn[$isDay]['paidReward'] == 1) $red[2] = true;
 
         if(empty($playerSer->getArg(Consts::XIANYUAN_GIFT_FREE_REWARD))) $red[3] = true;
@@ -341,5 +339,16 @@ class XianYuanService
         if(empty($playerSer->getArg(Consts::XIANYUAN_GIFT_REWARD)) && $playerSer->getArg(Consts::XIANYUAN_GIFT_SCHEDULE) >= 3) $red[4] = true;
 
         return $red;
+    }
+
+    public function getShowStatus():array
+    {
+        list($begin,$reset,$stopTime) = ConfigService::getInstance()->getActivityZhengji();
+
+        return [ 
+            'begin'  => intval($begin),
+            'end'    => intval($stopTime),
+            'remain' => $this->checkResidueTime($begin,$reset)
+        ]; 
     }
 }

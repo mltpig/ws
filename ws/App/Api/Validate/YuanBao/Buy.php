@@ -11,6 +11,7 @@ class Buy
         'timestamp'  => 'required|notEmpty',
         'sign'       => 'required|notEmpty',
         'id'         => 'required|notEmpty|integer',
+        'sequence'   => 'required|notEmpty|integer',
     ];
     
     public function getRules():array

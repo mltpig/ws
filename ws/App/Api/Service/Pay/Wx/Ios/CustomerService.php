@@ -14,7 +14,7 @@ class CustomerService
 {
     use CoroutineSingleTon;
     
-    public $redirect_uri = 'https://dev.shenzhenyuren.com/wydzg_yzy_iap/jsapi';
+    public $redirect_uri = 'https://ysjdftz.shenzhenyuren.com/wx/jsapi';
 
     public function run(array $param):string
     {

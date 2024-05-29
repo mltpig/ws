@@ -4,6 +4,7 @@ namespace App\Api\Service\Module;
 use App\Api\Service\PlayerService;
 use App\Api\Service\TaskService;
 use App\Api\Service\ShopService;
+use App\Api\Service\Node\NodeService;
 use App\Api\Utils\Consts;
 use App\Api\Utils\Keys;
 use App\Api\Table\ConfigParam;
@@ -19,12 +20,7 @@ class OpenCelebraService
     public function dailyReset(PlayerService $playerSer):void
     {
         //开服时间
-        $nodeKey        = Keys::getInstance()->getNodeListKey();
-        $site           = $playerSer->getData('site');
-        $startTimestamp = $this->getOpeningTime($nodeKey, $site);
-
-        //每日任务重置
-        $this->initTask($playerSer);
+        $startTimestamp = NodeService::getInstance()->getOpenTime($playerSer->getData('site'));
         //道具重置
         $this->initProp($playerSer,$startTimestamp,ConfigParam::getInstance()->getFmtParam('OPENSERVICE_CELEBRATION_TIME_LIMIT') + 0);
     }
@@ -33,10 +29,8 @@ class OpenCelebraService
     {
         //每日登录根据配置与当前时间差
         $task103 = TaskService::getInstance()->getTasksByType($playerSer->getData('task'),103);//活动任务
-        if(!$task103) $this->initTask($playerSer);
-
         $task104 = TaskService::getInstance()->getTasksByType($playerSer->getData('task'),104);//活动任务
-        if(!$task104) $this->initTask($playerSer);
+        if(!$task103 || !$task104) $this->initTask($playerSer);
     }
 
     public function initTask(PlayerService $playerSer):void
@@ -53,10 +47,10 @@ class OpenCelebraService
 
     public function initProp(PlayerService $playerSer,$startTimestamp,$resetInterval):void
     {
-        // if($this->checkAndResetActivity($startTimestamp, $resetInterval)){
-        //     $gid = ConfigParam::getInstance()->getFmtParam('OPENSERVICE_CELEBRATION_RESET_ITEM');
-        //     $playerSer->goodsBridge([['gid' => $gid, 'type' => GOODS_TYPE_1, 'num' => -$playerSer->getGoods($gid)]],'重置开服庆典道具');
-        // }
+        if($this->checkTime($startTimestamp,$resetInterval) < 1){
+            $gid = ConfigParam::getInstance()->getFmtParam('OPENSERVICE_CELEBRATION_RESET_ITEM');
+            $playerSer->goodsBridge([['gid' => $gid, 'type' => GOODS_TYPE_1, 'num' => -$playerSer->getGoods($gid)]],'重置开服庆典道具');
+        }
     }
 
     public function getOpenCelebraFmtData(PlayerService $playerSer):array
@@ -64,9 +58,7 @@ class OpenCelebraService
         $openCelebraTask = $playerSer->getData('task');
 
         //开服时间
-        $nodeKey        = Keys::getInstance()->getNodeListKey();
-        $site           = $playerSer->getData('site');
-        $startTimestamp = $this->getOpeningTime($nodeKey, $site);
+        $startTimestamp = NodeService::getInstance()->getOpenTime($playerSer->getData('site'));
 
         return [
             'schedule_task' => $this->getOpenCelebra103Task($playerSer,$openCelebraTask),
@@ -74,7 +66,8 @@ class OpenCelebraService
             'change_gift'   => ShopService::getInstance()->getShowList($playerSer,105),
             'gift'          => ShopService::getInstance()->getShowList($playerSer,106),
             'config'        => [
-                'residue_time' => $this->checkTime($startTimestamp,ConfigParam::getInstance()->getFmtParam('OPENSERVICE_CELEBRATION_TIME_LIMIT') + 0),
+                'residue_time'   => $this->checkTime($startTimestamp,ConfigParam::getInstance()->getFmtParam('OPENSERVICE_CELEBRATION_TIME_LIMIT') + 0),
+                'count_integral' => $playerSer->getArg(ConfigParam::getInstance()->getFmtParam('OPENSERVICE_CELEBRATION_RESET_ITEM')),
             ],
         ];
     }
@@ -87,17 +80,23 @@ class OpenCelebraService
         {
             $taskConfig = ['complete_type' => $detail['complete_type'], 'complete_params' => $detail['complete_params']];
             list($num,$state) = TaskService::getInstance()->getTaskState($playerSer,0,$taskConfig);
+
             $task_state = $state ? 1 : 0;
+            if(isset($task[$taskid]))
+            {
+                if($task[$taskid][1] == 2) $task_state = 2;
+            }
 
             $taskList[] = [
-                'id'     => $taskid,
-                'state'  => $task_state,
-                'title'  => $detail['name'],
-                'target' =>[
+                'id'      => $taskid,
+                'state'   => $task_state,
+                'title'   => $detail['name'],
+                'target'  =>[
                     'complete_type'   => $detail['complete_type'],
                     'complete_params' => $detail['complete_params'],
                     'val'             => $num,
                 ],
+                'rewards' =>$detail['rewards'],
             ];
         }
 
@@ -165,12 +164,29 @@ class OpenCelebraService
         return $endTimestamp  - time();
     }
 
-    function getOpeningTime($nodeKey, $site){
-        //开服时间
-        $startTimestamp = PoolManager::getInstance()->get('redis')->invoke(function (Redis $redis) use ($nodeKey,$site) {
-            return $redis->hGet($nodeKey, $site);
-        });
-        $startTimestamp = strtotime('+8 days',$startTimestamp);
-        return $startTimestamp;
+    public function getOpenCelebraRedPointInfo(PlayerService $playerSer):array
+    {
+        $openCelebraTask = $playerSer->getData('task');
+
+        $red             = [false,false,false];
+
+        $schedule_task   = $this->getOpenCelebra103Task($playerSer,$openCelebraTask);
+        foreach($schedule_task as $k => $v)
+        {
+            if($v['state'] == 1) $red[0] = true;
+        }
+
+        $change_task    = $this->getOpenCelebra104Task($openCelebraTask);
+        foreach($change_task as $k => $v)
+        {
+            if($v['state'] == 1) $red[1] = true;
+        }
+
+        $startTimestamp = NodeService::getInstance()->getOpenTime($playerSer->getData('site'));
+        if($this->checkTime($startTimestamp,ConfigParam::getInstance()->getFmtParam('OPENSERVICE_CELEBRATION_TIME_LIMIT') + 0) > 1){
+            $red[2] = true;
+        }
+
+        return $red;
     }
 }

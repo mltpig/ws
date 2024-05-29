@@ -24,7 +24,9 @@ class Battle extends BaseController
             $selfShowData = BattleService::getInstance()->getBattleShowData($this->player);
             list($_isSuccess,$battleLog,$rewardCount,$selfTotalHurt) = MonsterInvadeService::getInstance()->battle(
                 $battleData,$selfShowData);
-            $selfShowData['chara'] = $this->player->getData('user','chara');
+            $user = $this->player->getUserInfo();
+            $selfShowData['chara'] = $user['chara'];
+
             //获取奖励
             $reward = MonsterInvadeService::getInstance()->geBattleReward($rewardCount);
             $this->player->goodsBridge($reward,'异兽入侵挑战奖励',$now+1);

@@ -46,7 +46,7 @@ class Battle  extends BaseController
                     if($towerid == $floor)
                     {
                         $secret_tower_rank_key = RANK_SECRET_TOWER.$floor;
-                        $worldInfo = RankService::getInstance()->getSecretTowerRankInfo($secret_tower_rank_key, $this->param['site']);
+                        $worldInfo = RankService::getInstance()->getUaSortRankInfo($secret_tower_rank_key, $this->param['site']);
                         if(count($worldInfo) == 10) continue;
     
                         $power      = BattleService::getInstance()->getPower($selfData);
@@ -60,7 +60,7 @@ class Battle  extends BaseController
                 $this->player->setSecretTower('towerid',0,$towerid,'set');
                 $this->player->goodsBridge($config['challenge_reward'],'坠星矿场挑战奖励','0|'.$towerid);
             }
-            
+            $user = $this->player->getUserInfo();
             $result = [
                 'now'   => [
                     'towerid'  => $this->player->getData('secret_tower','towerid'),
@@ -69,7 +69,7 @@ class Battle  extends BaseController
                     'isWin'  => intval($isWin),
                     'log'    => $battleLog,
                     'reward' => $reward,
-                    'self'   => ['hp' => $selfHp ,'add' => $selfShowData,'chara' => $this->player->getData('user','chara')],
+                    'self'   => ['hp' => $selfHp ,'add' => $selfShowData,'chara' => $user['chara']],
                     'enemy'  => ['hp' => $enemyHp,'mosterid' => $config['moster_list'] ,
                         'add'       => $enemyAdd,
                         "mosterLv"  => $config['moster_level_list']],

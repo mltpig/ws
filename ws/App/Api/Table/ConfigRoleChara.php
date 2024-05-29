@@ -29,7 +29,7 @@ class ConfigRoleChara
             // 'get_type'          => [ 'type'=> Table::TYPE_STRING ,'size'=> 500 ],
             // 'skil'              => [ 'type'=> Table::TYPE_STRING ,'size'=> 500 ],
             // 'body_height'       => [ 'type'=> Table::TYPE_STRING ,'size'=> 500 ],
-             'belong'            => [ 'type'=> Table::TYPE_STRING ,'size'=> 500 ],
+             'belong'            => [ 'type'=> Table::TYPE_STRING ,'size'=> 20 ],
             // 'quality'           => [ 'type'=> Table::TYPE_STRING ,'size'=> 500 ],
             // 'params'            => [ 'type'=> Table::TYPE_STRING ,'size'=> 500 ],
             // 'attack_type'       => [ 'type'=> Table::TYPE_STRING ,'size'=> 500 ],
@@ -42,7 +42,7 @@ class ConfigRoleChara
         TableManager::getInstance()->add( $this->tableName , $columns , 100 );
 
         $columns = [ 'id' => [ 'type'=> Table::TYPE_STRING ,'size'=> 50 ] ,
-                    'belong'   => [ 'type'=> Table::TYPE_STRING ,'size'=> 500 ]
+                    'belong'   => [ 'type'=> Table::TYPE_STRING ,'size'=> 20 ]
         ];
         TableManager::getInstance()->add( $this->tableNameInit , $columns , 1 );
 
@@ -51,7 +51,7 @@ class ConfigRoleChara
             'get_type'        => [ 'type'=> Table::TYPE_INT ,'size'=> 8 ],
             'cost_id'         => [ 'type'=> Table::TYPE_STRING ,'size'=> 50 ],
             'skill'           => [ 'type'=> Table::TYPE_INT ,'size'=> 8 ],
-            'belong'          => [ 'type'=> Table::TYPE_STRING ,'size'=> 500 ],
+            'belong'          => [ 'type'=> Table::TYPE_STRING ,'size'=> 20 ],
         ];
         TableManager::getInstance()->add( $this->tableActivity , $columns , 10 );
 
@@ -88,6 +88,7 @@ class ConfigRoleChara
                     'get_type'        => $value['get_type'],
                     'cost_id'         => json_encode($cost),
                     'skill'           => $value['skill'],
+                    'belong'          => $value['belong']
                 ]);
             }else{
                 //只有官职需要
@@ -142,6 +143,7 @@ class ConfigRoleChara
                 'get_type'        => $config['get_type'],
                 'cost_id'         => json_decode($config['cost_id'],true),
                 'skill'           => $config['skill'],
+                'belong'          => $config['belong'],
             ];
         }
 
@@ -161,6 +163,7 @@ class ConfigRoleChara
             'get_type'        => $data['get_type'],
             'cost_id'         => json_decode($data['cost_id'],true),
             'skill'           => $data['skill'],
+            'belong'          => $data['belong'],
         ] : [];
 
     }

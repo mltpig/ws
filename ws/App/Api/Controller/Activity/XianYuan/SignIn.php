@@ -7,6 +7,7 @@ use App\Api\Table\Activity\ConfigFund;
 use App\Api\Table\Activity\ConfigActivityDaily;
 use App\Api\Controller\BaseController;
 use App\Api\Service\Module\XianYuanService;
+use App\Api\Service\Node\NodeService;
 use EasySwoole\Redis\Redis;
 use EasySwoole\Pool\Manager as PoolManager;
 
@@ -19,7 +20,7 @@ class SignIn extends BaseController
         $day    = $param['day'];
         $isDay  = $day - 1;
         $sign   = XianYuanService::getInstance()->getSignIn($this->player);
-        $startTimestamp = XianYuanService::getInstance()->getOpeningTime($this->player);
+        $startTimestamp = NodeService::getInstance()->getOpenTime($this->player->getData('site'));
         $resetInterval  = ConfigParam::getInstance()->getFmtParam('ZHENGJI_DAILY_RESET_TIME') + 0;
         $dayFrom        = XianYuanService::getInstance()->checkAndDay($startTimestamp,$resetInterval);
         $result         = '超出签到日期';

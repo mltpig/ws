@@ -18,7 +18,7 @@ class OffiAccountService
     public $mchid      = '1527320711';
     public $mchSecret  = 'tianjinyuren91120222MA06B1Y1XW99';
 
-    public $notify_url = 'https://dev.shenzhenyuren.com/wydzg_yzy_iap/pay_success_jsapi';
+    public $notify_url = 'https://ysjdftz.shenzhenyuren.com/wx/pay_success_jsapi';
 
 
     public function getAppid():string

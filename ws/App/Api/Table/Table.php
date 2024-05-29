@@ -75,6 +75,7 @@ class Table
         ConfigPaid::getInstance()->create();
         ConfigFund::getInstance()->create();
         ConfigActivityDaily::getInstance()->create();
+        Backlist::getInstance()->create();
     }
 
     public function reset():void
@@ -133,6 +134,7 @@ class Table
         ConfigPaid::getInstance()->initTable();
         ConfigFund::getInstance()->initTable();
         ConfigActivityDaily::getInstance()->initTable();
+        Backlist::getInstance()->initTable();
 
         echo "缓存初始化结束".date('Y-m-d H:i:s').PHP_EOL ;
     }

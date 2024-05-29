@@ -4,6 +4,7 @@ namespace App\Api\Controller;
 use App\Api\Service\Module\LogService;
 use App\Api\Service\PlayerService;
 use App\Api\Service\RedPointService;
+use App\Api\Service\Gm\BacklistService;
 use EasySwoole\Component\TableManager;
 use EasySwoole\EasySwoole\ServerManager;
 use EasySwoole\Socket\AbstractInterface\Controller;
@@ -53,6 +54,14 @@ class BaseController extends Controller
             
             $msg = json_encode([ 'code' => MANY_REQUEST ,'method' => $this->method, 'msg' => $tmp ],JSON_UNESCAPED_UNICODE|JSON_FORCE_OBJECT);
             $this->responseImmediately($msg);
+            return false;
+        }
+
+        if(BacklistService::getInstance()->get($playerInfo['uid']))
+        {
+            $msg = json_encode([ 'code' => BLACK_LIST ,'method' => $this->method, 'msg' => '您已被禁止登陆，详情请联系客服' ],JSON_UNESCAPED_UNICODE|JSON_FORCE_OBJECT);
+            $this->responseImmediately($msg);
+            ServerManager::getInstance()->getSwooleServer()->close($fd);
             return false;
         }
 

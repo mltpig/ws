@@ -40,10 +40,9 @@ class Receive extends BaseController
                             //如果奖励有副将，需要判断副将是否有位置存放
                             foreach ($config['reward'] as $key => $item){
                                 if($item['type'] == GOODS_TYPE_3 ){
-                                    $bag   = $this->player->getData('pet','bag');
-                                    $total = count($bag);
-                                    $free  =  $total - count(array_filter($bag));
-                                    if($free  >= 1){
+                                    $bagid = PetService::getInstance()->checkFreeBag( $this->player->getData('pet','bag') );
+                                    if($bagid < 0)
+                                    {
                                         $result = '副将栏已满';
                                         $this->sendMsg( $result );
                                         return;

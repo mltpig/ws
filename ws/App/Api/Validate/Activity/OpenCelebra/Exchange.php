@@ -11,6 +11,7 @@ class Exchange
         'timestamp'  => 'required|notEmpty',
         'sign'       => 'required|notEmpty',
         'id'         =>'required|notEmpty',
+        'num'        => 'required|notEmpty|integer|min:1',
     ];
     
     public function getRules():array

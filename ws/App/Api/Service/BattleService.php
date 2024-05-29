@@ -241,6 +241,87 @@ class BattleService
         return $attr;
     }
 
+    public function getRoleAttrCopy(array $detail): array
+    {
+        $attr = $this->getBattleAttrFmt();
+        $ratio = $this->getAttrRatioFmt();
+
+        $data = array();
+        $list = ['attack' => '攻击', 'speed' => '速度', 'defence' => '防御', 'hp' => '血量', 'stun' => '击晕'];
+
+        RoleService::getInstance()->getRoleAttrAdd($attr, $detail['lv']);
+        foreach ($list as $key => $item) {
+            $data['1角色-' . $item] = $attr[$key];
+        }
+        EquipService::getInstance()->getEquipAttrAdd($attr, $detail['equip']);
+        foreach ($list as $key => $item) {
+            $data['2装备-' . $item] = $attr[$key];
+        }
+        $this->getCloudAttrAdd($attr, $detail['cloud'], 'stage');
+        foreach ($list as $key => $item) {
+            $data['3附hui-' . $item] = $attr[$key];
+        }
+        ComradeService::getInstance()->getComradeAttrAdd($attr, $detail['comrade'], $ratio);
+        foreach ($list as $key => $item) {
+            $data['4Comrade-' . $item] = $attr[$key];
+        }
+        $this->getCharaAdd($ratio, $detail['chara']);
+        foreach ($list as $key => $item) {
+            $data['5模型-' . $item] = $attr[$key];
+        }
+        PetService::getInstance()->getPetAdd($ratio, isset($detail['pet']) ? $detail['pet'] : []);
+        foreach ($list as $key => $item) {
+            $data['6副将-' . $item] = $attr[$key];
+        }
+        SpiritService::getInstance()->getSpiritAttrAdd($attr, $detail['spirit'], $ratio);
+        foreach ($list as $key => $item) {
+            $data['7精怪-' . $item] = $attr[$key];
+        }
+        TacticalService::getInstance()->getTacticalAttrAdd($attr, $detail['tactical']);//处理阵法属性+天赋技能
+        foreach ($list as $key => $item) {
+            $data['8阵法-' . $item] = $attr[$key];
+        }
+        EquipmentService::getInstance()->getEquipmentAttrAdd($attr, $detail['equip'], $detail['equipment'], $ratio);
+        foreach ($list as $key => $item) {
+            $data['9装备精炼-' . $item] = $attr[$key];
+        }
+        MagicService::getInstance()->getMagicAttrAdd($attr, $detail['magic'], $ratio);
+        foreach ($list as $key => $item) {
+            $data['91神通-' . $item] = $attr[$key];
+        }
+
+        //获取临时加载属性，只能在dev环境下使用
+        if (Core::getInstance()->runMode() === 'dev') {
+            if (isset($detail['test'])) {
+                AttributeComputeService::getInstance()->getTestAttribute($attr, $detail['test']);
+            }
+        }
+
+        if ($buff = $this->getpataBuff()) {
+            $this->getTowerAttrAdd($attr, $buff, $ratio);
+            foreach ($list as $key => $item) {
+                $data['92镇妖塔buff-' . $item] = $attr[$key];
+            }
+        }
+        foreach ($list as $key => $item) {
+            if ('stun' == $key) {
+                $data['93 总百分比-' . $item] = $ratio[$key];
+            } else {
+                $data['93 总百分比-' . $item] = $ratio['ratio_' . $key];
+            }
+
+        }
+
+        //基础属性百分比加成，最后计算
+        AttributeComputeService::getInstance()->computeBaseAttr($attr, $ratio);
+        foreach ($list as $key => $item) {
+            $data['最终%比计算完-' . $item] = $attr[$key];
+        }
+
+        return $data;
+    }
+
+
     //获取玩家角色面板信息
     public function getRolePanel(array $detail): array
     {
@@ -327,6 +408,9 @@ class BattleService
     public function run(array $self, array $enemy, int $roundLimit, &$selfShowData, &$enemyShowData, bool $isRobot): array
     {
         $selfAttr = $this->getRoleAttr($self);
+
+        //$testShow = $this->getRoleAttrCopy($self);
+        //$selfShowData['test_show'] = $testShow;
         $selfPet = [];
         if ($self['pet']) {
             if ($self['pet']['active'] != -1) {
@@ -771,7 +855,7 @@ class BattleService
                 }
                 if ($enemyAttr['hp'] <= 0 && $enemyRevive > 0 && isset($enemyAttr['debuff']['freeze']) && !isset($enemySkill['magic'][133400])) {
                     $enemyFreeze = true;
-                }else{
+                } else {
                     $this->buffClear($selfAttr, $roundCount);//清自己身上状态
                     $this->buffClearEnemy($enemyAttr, $roundCount);//清敌方自己身上状态
                     //我方出手
@@ -807,7 +891,7 @@ class BattleService
                 //对冰冻做出特殊处理
                 if ($selfAttr['hp'] <= 0 && $selfRevive > 0 && isset($selfAttr['debuff']['freeze']) && !isset($selfSkill['magic'][133400])) {
                     $isFreeze = true;
-                }else{
+                } else {
                     $this->buffClear($enemyAttr, $roundCount);
                     $this->buffClearEnemy($selfAttr, $roundCount);//清敌方自己身上状态
 
@@ -1391,7 +1475,7 @@ class BattleService
             $mainBuff = ['buff' => $selfLineup['buff'], 'debuff' => $selfLineup['debuff']];
             foreach ($mainBuff as $buffName => $buffDetail) {
                 foreach ($buffDetail as $attrName => $effectDetail) {
-                    if($attrName != 'freeze') continue; //冰凍獨立清理
+                    if ($attrName != 'freeze') continue; //冰凍獨立清理
                     $selfLineup[$buffName][$attrName]--;
                     if ($selfLineup[$buffName][$attrName] <= 0) unset($selfLineup[$buffName][$attrName]);
                 }
@@ -1408,7 +1492,7 @@ class BattleService
             $mainBuff = ['buff' => $selfLineup['buff'], 'debuff' => $selfLineup['debuff']];
             foreach ($mainBuff as $buffName => $buffDetail) {
                 foreach ($buffDetail as $attrName => $effectDetail) {
-                    if($attrName == 'freeze') continue; //冰凍獨立清理
+                    if ($attrName == 'freeze') continue; //冰凍獨立清理
                     $selfLineup[$buffName][$attrName]--;
                     if ($selfLineup[$buffName][$attrName] <= 0) unset($selfLineup[$buffName][$attrName]);
                 }
@@ -1587,14 +1671,20 @@ class BattleService
 
 
         $log['hurt'] = ['self' => 0, 'enemy' => 0];
-        if (!in_array($petValue['id'], SkillService::PET_NO_ATTASK_SKILL_LIST)) {
-            SkillService::getInstance()->triggerSkill($log, $selfSkill, $selfBattleAttr,
-                $enemyBattleAttr, $selfDetail, $enemyDetail, 21);
-            if (MagicSkillService::getInstance()->isNegativeStatus($enemyDetail)) {
-                SkillService::getInstance()->triggerSkill($log, $selfSkill, $selfBattleAttr,
-                    $enemyBattleAttr, $selfDetail, $enemyDetail, 20);
-            }
+        if (in_array($petValue['id'], SkillService::PET_NO_ATTASK_SKILL_LIST)) {
+            //133403, 133405 这两个只能攻击时触发
+            unset($selfSkill['magic'][133403]);
+            unset($selfSkill['magic'][133405]);
         }
+
+
+        SkillService::getInstance()->triggerSkill($log, $selfSkill, $selfBattleAttr,
+            $enemyBattleAttr, $selfDetail, $enemyDetail, 21);
+        if (MagicSkillService::getInstance()->isNegativeStatus($enemyDetail)) {
+            SkillService::getInstance()->triggerSkill($log, $selfSkill, $selfBattleAttr,
+                $enemyBattleAttr, $selfDetail, $enemyDetail, 20);
+        }
+
         SkillService::getInstance()->triggerSkill($log, $selfSkill, $selfBattleAttr, $enemyBattleAttr, $selfDetail, $enemyDetail, 7);
         if ($selfType22Skill) {
             $skillList = SkillService::getInstance()->formatSkillList($selfType22Skill);

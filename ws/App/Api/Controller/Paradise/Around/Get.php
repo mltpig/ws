@@ -1,8 +1,7 @@
 <?php
 namespace App\Api\Controller\Paradise\Around;
-use App\Api\Utils\Consts;
-use App\Api\Service\ParadisService;
 use App\Api\Controller\BaseController;
+use App\Api\Service\Actor\PlayerActorService;
 
 //获取当前福地物品状态
 class Get extends BaseController
@@ -11,15 +10,15 @@ class Get extends BaseController
     public function index()
     {
 
-        $around  = $this->player->getData('paradise','around');
-        $workers = $this->player->getData('paradise','worker')['list'];
+        $uid               = $this->player->getData('openid');
+        $site              = $this->player->getData('site');
+        $this->param['fd'] = $this->player->getData('fd');
 
-        $time = $this->player->getArg(Consts::HOMELAND_TARGET_REFRESH_TIME);
+        $actorId = PlayerActorService::getInstance()->getAcrotId($uid,$site);
 
-        $this->sendMsg( [
-            'list' => ParadisService::getInstance()->getAroundInfo($around,$workers),
-            'remianTime' => $time ? $time - time() : 0
-        ] );
+        $result  = PlayerActorService::getInstance()->send($actorId,'getAroundParadiseList', $this->param );
+
+        $this->sendMsg($result);
     }
 
 }

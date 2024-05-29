@@ -69,6 +69,10 @@ return [
         'getObjectTimeout'  => 3.0, // 设置 获取连接池的超时时间
         'loadAverageTime'   => 0.001, // 设置 负载阈值
     ],
+    'ACTOR' => [
+        'ip'          => '127.0.0.1',
+        'listenPort'  => 9910,
+    ],
 ];
 
 

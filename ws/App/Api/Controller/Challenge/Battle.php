@@ -38,6 +38,7 @@ class Battle  extends BaseController
                     $reward = $next['rewards'];
                     $this->player->goodsBridge($reward,'妖王挑战胜利',$nextid);
                     $this->player->setData('challenge',null,$nextid);
+                    TaskService::getInstance()->setVal($this->player,77,1,'add');
                 }
                 
                 $count  = $this->player->getArg(CHALLENGE);
@@ -47,6 +48,7 @@ class Battle  extends BaseController
                 $config = ConfigParam::getInstance()->getFmtParam('WILDBOSS_REPEAT_COST_PARAM');
                 $number = $cost['num'] * ($config[$count]/1000);
                 TaskService::getInstance()->setVal($this->player,27,1,'add');
+                $user =$this->player->getUserInfo();
 
                 $result = [
                     'now' => [
@@ -57,7 +59,7 @@ class Battle  extends BaseController
                         'isWin'  => intval($isWin),
                         'log'    => $battleLog,
                         'reward' => $reward,
-                        'self'   => ['hp' => $selfHp ,'add' => $selfShowData,'chara' => $this->player->getData('user','chara') ],//附魂 模型
+                        'self'   => ['hp' => $selfHp ,'add' => $selfShowData,'chara' => $user['chara'] ],//附魂 模型
                         'enemy'  => ['hp' => $enemyHp,'mosterid' => $next['moster_list'],
                             'add' => $enemyAdd,
                             "mosterLv" => $next['moster_level_list']],

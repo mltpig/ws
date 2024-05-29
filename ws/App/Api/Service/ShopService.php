@@ -14,12 +14,13 @@ class ShopService
         foreach ($config as $id => $value) 
         {
             $list[] = [
-                'id'        => $id,
-                'name'      => $value['name'],
-                'remain'    => $playerSer->getArg($id),
-                'buy_limit' => $value['buy_limit'],
-                'price'     => $value['price'],
-                'reward'    => $value['reward'],
+                'id'             => $id,
+                'name'           => $value['name'],
+                'remain'         => $playerSer->getArg($id),
+                'buy_limit'      => $value['buy_limit'],
+                'price'          => $value['price'],
+                'reward'         => $value['reward'],
+                'buy_limit_type' => $value['buy_limit_type'],
             ];
         }
 
@@ -52,13 +53,15 @@ class ShopService
 
     public function getShopRedPointInfo(PlayerService $playerSer):array
     {
-        //100000085
-        $red = [false];
+        //100000085,100000105
+        $red = [false,false];
         
         if(empty($playerSer->getArg(100000085))) $red[0] = true;
+        if(empty($playerSer->getArg(100000105))) $red[1] = true;
 
         return [
             '100000085' => $red[0],
+            '100000105' => $red[1],
         ];
     }
 

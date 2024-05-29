@@ -22,7 +22,7 @@ class Logger implements LoggerInterface
         $date = date('Y-m-d H:i:s');
         $levelStr = $this->levelMap($logLevel);
         $filePath = $this->logDir."/log_{$category}.log";
-        $str = "[{$date}][{$category}][{$levelStr}]:[{$msg}]\n";
+        $str = "[{$date}][{$category}][{$category}]:[{$msg}]\n";
         file_put_contents($filePath,"{$str}",FILE_APPEND|LOCK_EX);
         return $str;
     }

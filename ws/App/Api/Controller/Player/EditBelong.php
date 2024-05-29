@@ -3,6 +3,7 @@ namespace App\Api\Controller\Player;
 use App\Api\Controller\BaseController;
 use App\Api\Service\RoleService;
 use App\Api\Table\ConfigParam;
+use App\Api\Table\ConfigRoleChara;
 use App\Api\Utils\Consts;
 
 class EditBelong extends BaseController
@@ -23,8 +24,11 @@ class EditBelong extends BaseController
 
         if( $number <= $hasNum )
         {
+            $oldBelong =  $this->player->getCharaBelong();
             //设置模型属性
             $this->player->setArg(Consts::CHARA_BELONG,$belong,'reset');
+            //修改头像对应的模型
+
 
             //扣除物品
             $this->player->goodsBridge([[ 'type' => GOODS_TYPE_1,'gid' => $costConfig['gid'],'num' => -$number ]],'阵法',$hasNum );
@@ -35,6 +39,7 @@ class EditBelong extends BaseController
                 'user'		=> $this->player->getUserInfo(),
                 'head' 		=> $this->player->getData('head'),
                 'remain'    => $remain,//剩余物品数量
+                'old_belong'=>$oldBelong,
             ];
         }
 

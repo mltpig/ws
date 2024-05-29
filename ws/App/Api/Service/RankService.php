@@ -118,8 +118,8 @@ class RankService
 
     }
 
-    // 六道秘境成就排行榜
-    public function getSecretTowerRankInfo(string $name, int $site, int $len=9):array
+    //（先到先登顶）六道秘境排行榜
+    public function getUaSortRankInfo(string $name, int $site, int $len=9):array
     {
         $rankName = Keys::getInstance()->getRankName($name,$site);
         $rankInfo = PoolManager::getInstance()->get('redis')->invoke(function (Redis $redis) use($rankName, $len) {
@@ -128,13 +128,12 @@ class RankService
             ];
         });
 
-        return $this->getSecretTowerRank($rankInfo['worldData']);
+        return $this->getUaSortRank($rankInfo['worldData']);
     }
 
-    //组装六道秘境成就排行榜
-    public function getSecretTowerRank(array $worldData):array
+    //六道秘境
+    public function getUaSortRank(array $worldData):array
     {
-
         uasort($worldData, function($a, $b) {
             return $a - $b; // 升序排序 使用uasort()对数组进行排序
         });
@@ -149,5 +148,4 @@ class RankService
         
         return $worldRank;
     }
-
 }

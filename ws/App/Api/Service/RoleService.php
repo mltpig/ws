@@ -66,14 +66,14 @@ class RoleService
 
         $chara =  $playerSer->getData('user','chara');
         
-        if($chara['type'] != 2) $playerSer->setData('user','chara',['type' => 1,'value' => strval($unlockHead['id']) ] );
+        if($chara['type'] != 2) $playerSer->setData('user','chara',['type' => 1,'value' => strval($unlockHead['id']), 'belong' => $belong] );
         
         // $playerSer->setData('user','head', ['type' => 1,'value' => strval($unlockHead['id']) ] );
 
         $chara = $this->getCharaFmt($playerSer);
-
+        $user  = $playerSer->getUserInfo();
         $playerSer->pushi([ 'code' => SUCCESS, 'method' => 'user_update', 'data' => [
-            'user'  => $playerSer->getUserInfo(),
+            'user'  => $user,
             'chara' => $chara,
             'head'  => $playerSer->getData('head'),
         ]  ]);
@@ -101,7 +101,7 @@ class RoleService
                 case 2:
                     foreach ($charaType as $charaid => $lv) 
                     {
-                        $config = ConfigRoleChara::getInstance()->getOne($charaid);
+                        $config = ConfigRoleChara::getInstance()->getActivityOne($charaid);
 
                         $list[] = ['id' => strval($charaid) ,'lv' => $lv,'type' => $type,'belong' => $config['belong']];
                     }

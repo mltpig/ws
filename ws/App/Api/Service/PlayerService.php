@@ -22,6 +22,9 @@ use App\Api\Service\Module\LifetimeCardService;
 use App\Api\Service\Module\XianYuanService;
 use App\Api\Service\Module\ShangGuService;
 use App\Api\Service\Module\OpenCelebraService;
+use App\Api\Service\Module\ConfigService;
+use App\Api\Service\Module\ParadisService;
+use App\Api\Service\Module\OpenRankService;
 
 class PlayerService extends BaseService
 {
@@ -29,6 +32,8 @@ class PlayerService extends BaseService
 
     public function check():void
     {
+		ConfigService::getInstance()->setSite($this->getData('site'));
+
         $time     = time();
         $lastTime = strtotime($this->getData('last_time'));
 		
@@ -39,11 +44,11 @@ class PlayerService extends BaseService
 
         ActivityService::getInstance()->check($this,$time);
         TreeService::getInstance()->checkTree($this,$time);
-        ParadisService::getInstance()->checkParadis($this,$time,$lastTime);
         ComradeService::getInstance()->check($this,$time);
 		MonthlyCardService::getInstance()->check($this,$time);//月卡
 		LifetimeCardService::getInstance()->check($this,$time);//终身卡
 		XianYuanService::getInstance()->check($this,$time);//仙缘
+		ShangGuService::getInstance()->check($this);//商贾
 		OpenCelebraService::getInstance()->check($this,$time);//开服庆典
 
         $this->setData('last_time',null,date('Y-m-d H:i:s'));
@@ -100,6 +105,8 @@ class PlayerService extends BaseService
 		XianYuanService::getInstance()->dailyReset($this);
 		ShangGuService::getInstance()->dailyReset($this);
 		OpenCelebraService::getInstance()->dailyReset($this);
+		OpenRankService::getInstance()->dailyReset($this);
+		TaskService::getInstance()->dailyReset($this);
 
 		MonthlyCardService::getInstance()->dailyReset($this);//月卡
 		LifetimeCardService::getInstance()->dailyReset($this);//终身卡
@@ -114,6 +121,7 @@ class PlayerService extends BaseService
 			$this->setData('doufa','enemy',[]);
 			//分数从排行榜取，不再从自己数据取
 			// $this->setData('doufa','score',1000);
+			ParadisService::getInstance()->weekReset($this);
 		}
 
     }
@@ -396,6 +404,9 @@ class PlayerService extends BaseService
 			260094   => $this->getGoods(260094), //6级用间刻印
 			260095   => $this->getGoods(260095), //7级用间刻印
 			260096   => $this->getGoods(260096), //8级用间刻印
+            100074   => $this->getGoods(100074), //修改角色模型
+			105048	 => $this->getGoods(105048), //庆典积分
+
 		];
     }
 	 
@@ -611,11 +622,13 @@ class PlayerService extends BaseService
 			'activity' 	=> [
 				'dailyReward'   => ConfigParam::getInstance()->getFmtParam('AD_REWARD'),
 				'firstRecharge' => ActivityService::getInstance()->getFirstRechargeConfig($this),
-				'signIn' => ActivityService::getInstance()->getSignInState($this),
+				'signIn' 		=> ActivityService::getInstance()->getSignInState($this),
 				'newYear' => [
 					'begin' => strtotime(Consts::ACTIVITY_NEW_YEAR_BEGIN),
 					'end' 	=> strtotime(Consts::ACTIVITY_NEW_YEAR_END),
 				],
+				'shanggu' => ShangGuService::getInstance()->getShowStatus(),
+				'zhengji' => XianYuanService::getInstance()->getShowStatus(),
 			],
 			'daily_reward' 	=> ActivityService::getInstance()->getDailyRewardFmt($this),
 			'comrade' => [
@@ -638,6 +651,8 @@ class PlayerService extends BaseService
 			'monthly_card'	=> MonthlyCardService::getInstance()->getMonthlyCardFmtData( $this),
 			'lifetime_card'	=> LifetimeCardService::getInstance()->getLifetimeCardFmtData( $this),
 			'ticket'   		=> $ticket,
+			'like'   		=> OpenRankService::getInstance()->getLikeState($this),
+			'serverTime'	=> time(),
 		];
 	}
 
@@ -653,6 +668,14 @@ class PlayerService extends BaseService
         if(isset($user['chara']['belong']) && $user['chara']['belong'] != 0 ){
             $user['chara']['belong'] = $user['chara_belong'];
         }
+        if(!isset($user['chara']['belong'])){
+            if( $user['chara']['type'] == 2){
+                $user['chara']['belong'] = 0;
+            }else{
+                $user['chara']['belong'] = $user['chara_belong'];
+            }
+        }
+
 		return $user;
     }
 
@@ -921,25 +944,6 @@ class PlayerService extends BaseService
 			break;
 			case 'flushall':
 				$this->shanggu = $value;
-			break;
-		}
-	}
-
-	public function setOpenCelebra(string $field,int $id, $value,string $action):void
-	{
-		switch ($action) 
-		{
-			case 'set':
-				$this->open_celebra[$field] = $value;
-			break;
-			case 'multiSet':
-				$this->open_celebra[$field][$id] = $value;
-			break;
-			case 'push':
-				$this->open_celebra[$field][] = $value;
-			break;
-			case 'flushall':
-				$this->open_celebra = $value;
 			break;
 		}
 	}

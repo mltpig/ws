@@ -83,6 +83,7 @@ class DoufaService
         {
             $robotConfig = ConfigDoufaRobot::getInstance()->getOne($site,$playerid);
             $data = $robotConfig;
+
             if(!$data)
             {
                 $playerSer = new PlayerService($playerid,$site);
@@ -103,7 +104,12 @@ class DoufaService
                     'power'    => BattleService::getInstance()->getPower($battleData),
                     'user'     => $playerSer->getUserInfo(),
                 ];
+            }else{
+                if(!isset($data['user']['chara_belong'])){
+                    $data['user']['chara_belong'] = 1;
+                }
             }
+
 
             $info[] = [
                 'playerid' => $data['playerid'],
@@ -112,6 +118,7 @@ class DoufaService
                 'rolelv'   => $data['rolelv'],
                 'nickname' => $data['user']['nickname'],
                 'head'     => $data['user']['head'],
+                'chara_belong' =>$data['user']['chara_belong'],
             ];
         }
 
@@ -130,15 +137,17 @@ class DoufaService
         foreach ($worldInfo as $key => $value) 
         {
             $player = new PlayerService($value['playerid'],$site);
-            
+
+            $user  = $player->getUserInfo();
             $list[] = [
                 'index'    => $value['index'],
                 'score'    => $value['score'],
                 'playerid' => $value['playerid'],
                 'rolelv'   => $player->getData('role','lv'),
-                'head'     => $player->getData('user','head'),
-                'nickname' => $player->getData('user','nickname'),
-                'chara'    => $player->getData('user','chara'),
+                'head'     => $user['head'],
+                'nickname' => $user['nickname'],
+                'chara'    => $user['chara'],
+                'chara_belong' =>$user['chara_belong'],
                 'cloudid'  => $player->getData('cloud','apply'),
                 'pet'      => PetService::getInstance()->getPetGoIds($player->getData('pet')),
             ];

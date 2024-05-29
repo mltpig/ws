@@ -2,6 +2,7 @@
 namespace App\Api\Service\Pay\Wx;
 use App\Api\Model\PayOrder;
 use App\Api\Service\PlayerService;
+use App\Api\Table\ConfigPaid;
 use EasySwoole\EasySwoole\Logger;
 use EasySwoole\Log\LoggerInterface;
 use App\Api\Service\Module\TicketService;
@@ -63,7 +64,7 @@ class PayCallBack
 
             $orderObj->update([
                 'channe_order' => isset($payload['WeChatPayInfo']['MchOrderNo']) ? $payload['WeChatPayInfo']['MchOrderNo'] : '',
-                'state'        => 1,
+                'state'        => 2,
                 'update_time'  => date('Y-m-d H:i:s'),
             ]);
 
@@ -91,7 +92,7 @@ class PayCallBack
         } 
 
         try {
-            
+            $config = ConfigPaid::getInstance()->getOne($orderInfo['recharge_id']);
             $balance = TicketService::getInstance($player)->getBalance();
             $data = [
                 'code'=> SUCCESS,
@@ -99,6 +100,10 @@ class PayCallBack
                 'data'=> [ 
                     'ticket' => $balance,
                     'rechargeId' => $orderInfo['recharge_id'],
+                    'num' => $config['repeat_reward']['num'],
+                    'buyQuantity' => $config['price'],
+                    'currencyType' => 'CNY',
+                    'outTradeNo'=> $orderInfo['order_id'],
                 ]
             ];
     

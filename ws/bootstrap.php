@@ -1,6 +1,6 @@
 <?php
 
-defined("CHANNEL") or define("CHANNEL", "wydzg_yzy_iap" );
+defined("CHANNEL") or define("CHANNEL", "wx" );
 defined("CHANNEL_PAY") or define("CHANNEL_PAY", "weixin" );
 defined("TABLE_UID_FD") or define("TABLE_UID_FD", "table_uid_fd" );
 defined("TABLE_FD_UID") or define("TABLE_FD_UID", "table_fd_uid" );
@@ -11,6 +11,7 @@ defined('ERROR') or define('ERROR',1);
 defined('RELOGIN') or define('RELOGIN',2);
 defined('REMOTE_LOGIN') or define('REMOTE_LOGIN',3);
 defined('MANY_REQUEST') or define('MANY_REQUEST',4);
+defined('BLACK_LIST') or define('BLACK_LIST',5);
 
 defined('USER_SET') or define('USER_SET','user_set');
 
@@ -179,3 +180,12 @@ function bubbleSort(array $list,string $field)
     return $list;
 }
 
+function getSumAscii(string $string ):int
+{
+    $sum = 0;
+    for ($i=0; $i < strlen($string); $i++) 
+    {
+        $sum += ord($string[$i]);
+    }
+    return $sum;
+}

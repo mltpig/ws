@@ -11,6 +11,7 @@ class Order
         'timestamp'    => 'required|notEmpty',
         'sign'         => 'required|notEmpty',
         'rechargeId'   => 'required|notEmpty',
+        'device'       => 'required|notEmpty',
     ];
     
     public function getRules():array

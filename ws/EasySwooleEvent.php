@@ -25,10 +25,15 @@ use App\Api\Table\Table;
 use App\Crontab\PlayerCacheToMysql;
 use App\Crontab\DoufaDaily;
 use App\Crontab\MonsterInvade;
+use App\Crontab\OpenRankDaily;
 
 use App\Process\LogProp;
 use EasySwoole\Component\Process\Config as ProcessConfig;
 use EasySwoole\Component\Process\Manager as ProcessManager;
+
+use EasySwoole\Actor\Actor;
+use App\Actor\CreateActor;
+use App\Actor\PlayerActor;
 
 class EasySwooleEvent implements Event
 {
@@ -90,6 +95,7 @@ class EasySwooleEvent implements Event
         $crontab->register(new PlayerCacheToMysql());
         $crontab->register(new DoufaDaily());
         $crontab->register(new MonsterInvade());
+        $crontab->register(new OpenRankDaily());
 
         $register->add($register::onWorkerStart, function (\Swoole\Server $server,int $workerId){
             if($workerId !== 0) return;
@@ -104,6 +110,9 @@ class EasySwooleEvent implements Event
             'enableCoroutine' => true, // 设置 自定义进程自动开启协程
         ]);
         ProcessManager::getInstance()->addProcess(new LogProp($processConfig));
+
+        Actor::getInstance()->register(CreateActor::class);
+        Actor::getInstance()->register(PlayerActor::class);
     }
 
     public static function onRequest(Request $request, Response $response): bool

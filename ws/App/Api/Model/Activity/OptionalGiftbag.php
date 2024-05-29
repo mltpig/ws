@@ -4,6 +4,6 @@ use EasySwoole\ORM\AbstractModel;
 
 class OptionalGiftbag extends AbstractModel
 {
-    protected $tableName = 'activity_optional_giftbag';
+    protected $tableName = 'activity_optional_giftbag_iap';
 
 }

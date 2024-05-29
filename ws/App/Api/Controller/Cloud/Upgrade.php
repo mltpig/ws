@@ -72,6 +72,7 @@ class Upgrade extends BaseController
                             $this->player->setCloud('step',0,'set');
                         }
                         TaskService::getInstance()->setVal($this->player,30,$costNum,'add');
+                        TaskService::getInstance()->setVal($this->player,78,$costNum,'add');
                         $result = [ 
                             'cloud'  => $this->player->getData('cloud'),
                             'remain' => $this->player->getGoods($cost['gid']),

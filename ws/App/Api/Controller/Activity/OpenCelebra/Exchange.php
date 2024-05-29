@@ -11,24 +11,67 @@ class Exchange extends BaseController
 
     public function index()
     {   
-        $param = $this->param;
+        $param  = $this->param;
+        $number = $param['num'];
         $config = ConfigShop::getInstance()->getOne($param['id']);
 
-        $result   = '兑换上限已上限';
-        if($config['buy_limit'] > $this->player->getArg($param['id']) )
+        $costGid    = $config['price']['gid'];
+        $costTotal  = $config['price']['num'] * $number;
+
+        $result = '积分不足';
+        if($this->player->getGoods($costGid) >= $costTotal)
         {
-            $reward  = $goodsList = $config['reward'];
-            $reward[] = ['gid' => $config['price']['gid'], 'num' => -$config['price']['num'], 'type' => GOODS_TYPE_1 ];
-            
-            $this->player->goodsBridge($reward,'兑换开服庆典');
+            if($config['buy_limit'] == -1 )
+            {
+                $reward   = [];
+                foreach ($config['reward'] as $detail) 
+                {
+                    $detail['num'] *= $number;
+                    $reward[] = $detail;
+                }
 
-            $this->player->setArg($param['id'],1,'add');
-
-            $result = [
-                'open_celebra' => OpenCelebraService::getInstance()->getOpenCelebraFmtData($this->player),
-                'reward'   => $goodsList,
-                'remain'   => $this->player->getGoods($config['price']['gid']),
-            ];
+                $costList = [ [ 'type' => GOODS_TYPE_1,'gid' => $costGid,'num' => -$costTotal ] ];
+                $this->player->goodsBridge(array_merge($reward,$costList),'兑换开服庆典');
+    
+                $this->player->setArg($param['id'],1,'add');
+                $result = [
+                    'open_celebra'  => OpenCelebraService::getInstance()->getOpenCelebraFmtData($this->player),
+                    'reward'        => $reward,
+                    'remain'        => $this->player->getGoods($costGid),
+                ];
+            }else{
+                $result = '选择数量超过限制';
+                if($config['buy_limit'] >= $number )
+                {
+                    $result   = '兑换已达上限';
+                    $nowNum   = $this->player->getArg($param['id']);
+                    if($config['buy_limit'] > $nowNum )
+                    {
+                        $result   = '总计数量超过限制,请重新选择';
+                        $totalNum = $nowNum + $number;
+                        if($config['buy_limit'] >= $totalNum)
+                        {
+                            $this->player->setArg($param['id'],$number,'add');
+    
+                            $reward   = [];
+                            foreach ($config['reward'] as $detail) 
+                            {
+                                $detail['num'] *= $number;
+                                $reward[] = $detail;
+                            }
+    
+                            $costList = [ [ 'type' => GOODS_TYPE_1,'gid' => $costGid,'num' => -$costTotal ] ];
+                            $this->player->goodsBridge(array_merge($reward,$costList),'兑换开服庆典');
+    
+                            $result = [
+                                'open_celebra'  => OpenCelebraService::getInstance()->getOpenCelebraFmtData($this->player),
+                                'reward'        => $reward,
+                                'remain'        => $this->player->getGoods($costGid),
+                            ];
+                        }
+                    }
+                }
+            }
         }
         $this->sendMsg( $result );
     }

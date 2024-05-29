@@ -19,7 +19,6 @@ class LogService
     public function save():void
     {
         TaskManager::getInstance()->async(new LogTask( $this->list ));
-        
         $this->list = [];
     }
 

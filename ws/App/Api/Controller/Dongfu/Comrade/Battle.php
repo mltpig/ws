@@ -45,6 +45,8 @@ class Battle  extends BaseController
                         }
 
                         $comrades = $this->player->getData('comrade',$id);
+                        $user = $this->player->getUserInfo();
+
 
                         $result = [
                             'now'          => [ 'battle' => $comrades['battle'] ],
@@ -52,7 +54,7 @@ class Battle  extends BaseController
                                 'isWin'  => intval($isWin),
                                 'log'    => $battleLog,
                                 'reward' => $reward,
-                                'self'   => ['hp' => $selfHp ,'add' => $selfShowData,'chara' => $this->player->getData('user','chara') ],//附魂 模型
+                                'self'   => ['hp' => $selfHp ,'add' => $selfShowData,'chara' => $user['chara'] ],//附魂 模型
                                 'enemy'  => ['hp' => $enemyHp,'mosterid' => $config['monster_id'] ,
                                     'add' => $enemyAdd,
                                     "mosterLv" => $config['monster_level']],

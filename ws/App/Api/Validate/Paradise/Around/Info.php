@@ -11,6 +11,7 @@ class Info
         'timestamp'   => 'required|notEmpty',
         'sign'        => 'required|notEmpty',
         'rid'         => 'required|notEmpty',
+        'isopen'      => 'required|notEmpty',
     ];
     
     public function getRules():array

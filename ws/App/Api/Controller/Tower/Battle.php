@@ -65,6 +65,7 @@ class Battle  extends BaseController
                     $this->player->setTower('towerid',0,$towerid,'set');
                     $this->player->goodsBridge($config['repeat_rewards'],'千里走单骑通关奖励',$towerid);
                 }
+                $user = $this->player->getUserInfo();
 
                 $result = [
                     'now'   => [
@@ -75,7 +76,7 @@ class Battle  extends BaseController
                         'log'    => $battleLog,
                         'repeat_rewards' => $repeat_rewards,
                         'reward' => $rewards,
-                        'self'   => ['hp' => $selfHp ,'add' => $selfShowData,'chara' => $this->player->getData('user','chara') ],
+                        'self'   => ['hp' => $selfHp ,'add' => $selfShowData,'chara' => $user['chara'] ],
                         'enemy'  => ['hp' => $enemyHp,'mosterid' => $config['moster_list'] ,
                             'add' => $enemyAdd,
                             "mosterLv" => $config['moster_level_list']],

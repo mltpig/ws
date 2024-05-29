@@ -26,7 +26,7 @@ class VoucherService
     {
         $hasNum = $this->player->getGoods(105047);
         $num = $hasNum - $amount;
-        $this->player->goodsBridge([['type' => GOODS_TYPE_1, 'gid' => 105047, 'num' => $num]], '支付测试22', $hasNum);
+        $this->player->goodsBridge([['type' => GOODS_TYPE_1, 'gid' => 105047, 'num' => - $amount]], '支付测试22', $hasNum);
         return ['balance' => $num, 'bill_no' => strval(SnowFlake::make(rand(0, 31), rand(0, 127)))];
     }
 
@@ -34,7 +34,7 @@ class VoucherService
     {
         $hasNum = $this->player->getGoods(105047);
         $num = $hasNum + $amount;
-        $this->player->goodsBridge([['type' => GOODS_TYPE_1, 'gid' => 105047, 'num' => $num]], '支付测试11', $hasNum);
+        $this->player->goodsBridge([['type' => GOODS_TYPE_1, 'gid' => 105047, 'num' => $amount]], '支付测试11', $hasNum);
         return $num;
     }
 

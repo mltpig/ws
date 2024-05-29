@@ -11,6 +11,7 @@ class CollectGoodsRevokeByWorker
         'timestamp'  => 'required|notEmpty',
         'sign'       => 'required|notEmpty',
         'id'         => 'required|notEmpty|between:1,10',
+        'rid'        => 'required',
     ];
     
     public function getRules():array

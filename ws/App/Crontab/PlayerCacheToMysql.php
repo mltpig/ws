@@ -39,7 +39,6 @@ class PlayerCacheToMysql implements JobInterface
                         if(Player::create()->update($userInfo,['roleid' => $userInfo['roleid']]))
                         {
                             $num++;
-                            $redis->unlink($playerKey);
                         }else{
                             $fail['update_fail'][] = $playerKey;
                         }

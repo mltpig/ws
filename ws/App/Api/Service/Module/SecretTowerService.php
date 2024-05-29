@@ -148,7 +148,7 @@ class SecretTowerService
 
                 // 根据排行榜条件判断奖励状态
                 $key = RANK_SECRET_TOWER.$k;
-                $worldInfo = RankService::getInstance()->getSecretTowerRankInfo($key, $site);
+                $worldInfo = RankService::getInstance()->getUaSortRankInfo($key, $site);
                 if(count($worldInfo) == 10)
                 {
                     $achievements[$k] = 1;
@@ -167,6 +167,8 @@ class SecretTowerService
             list($playerid,$power,$lv) = explode(":",$value['playerid']);
 
             $player = new PlayerService($playerid,$site);
+            $user = $player->getUserInfo();
+            $selfShowData['chara'] = $user['chara'];
 
             $list[] = [
                 'index'    => $value['index'],
@@ -174,9 +176,9 @@ class SecretTowerService
                 'playerid' => $playerid,
                 'power'    => $power,
                 'rolelv'   => $lv + 0,
-                'head'     => $player->getData('user','head'),
-                'nickname' => $player->getData('user','nickname'),
-                'chara'    => $player->getData('user','chara'),
+                'head'     => $user['head'],
+                'nickname' => $user['nickname'],
+                'chara'    => $user['chara'],
                 'cloudid'  => $player->getData('cloud','apply'),
                 'pet'      => PetService::getInstance()->getPetGoIds($player->getData('pet')),
             ];

@@ -2,6 +2,7 @@
 namespace App\Api\Service;
 
 use App\Api\Model\Player;
+use App\Api\Service\Module\ParadisService;
 use App\Api\Utils\Keys;
 use App\Api\Table\ConfigParam;
 use App\Api\Table\ConfigCloud;
@@ -136,7 +137,7 @@ class BaseService
             'tmp'         => json_encode([]),
             'cloud'       => json_encode([ 'apply' => -1,'stage' => 1,'lv' => 1,'step' => 0,'list' => [ $cloudInitId ] ]),
             'doufa'       => json_encode([ 'enemy' => [],'score' => 0 ]),
-            'paradise'    => json_encode([]),
+            'paradise'    => ParadisService::getInstance()->getInitParadise($this->site,$this->playerKey) ,
             'comrade'     => json_encode([]),
             'pet'         => json_encode([]),
             'spirit'      => json_encode([]),
@@ -191,7 +192,7 @@ class BaseService
         $newData = array();
         foreach ($this as $name => $value)
         {
-            if(!property_exists($this, $name) || is_null($value) || in_array($name,['playerKey','fd'])) continue;
+            if(!property_exists($this, $name) || is_null($value) || in_array($name,['playerKey','paradise','fd'])) continue;
 
             if($field && !in_array($name,$field)) continue;
 
@@ -205,11 +206,15 @@ class BaseService
                 'nickname'  => $this->user['nickname'],
             ])
         ];
-        PoolManager::getInstance()->get('redis')->invoke(function (Redis $redis) use ($newData,$nodeKey,$nodeInfo) {
+
+        $node = $this->site;
+        $paradisActiveKey = Keys::getInstance()->getParadisActiveKey($node);
+        PoolManager::getInstance()->get('redis')->invoke(function (Redis $redis) use ($newData,$nodeKey,$nodeInfo,$node,$paradisActiveKey) {
             $redis->hMSet($this->playerKey, $newData);
             //时刻更新用户等级昵称
             $redis->hMSet($nodeKey, $nodeInfo);
             //日活是否有添加
+            if($redis->sIsMember($paradisActiveKey,$this->playerKey)) $redis->sAdd($paradisActiveKey, $this->playerKey);
             if($redis->sIsMember(USER_SET,$this->playerKey)) $redis->sAdd(USER_SET, $this->playerKey);
         });
     }

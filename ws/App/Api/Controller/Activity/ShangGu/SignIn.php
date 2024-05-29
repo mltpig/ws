@@ -4,7 +4,9 @@ use App\Api\Utils\Keys;
 use App\Api\Utils\Consts;
 use App\Api\Table\ConfigParam;
 use App\Api\Table\Activity\ConfigActivityDaily;
+use App\Api\Service\Module\ConfigService;
 use App\Api\Service\Module\ShangGuService;
+use App\Api\Service\Node\NodeService;
 use App\Api\Controller\BaseController;
 
 class SignIn extends BaseController
@@ -16,9 +18,9 @@ class SignIn extends BaseController
         $day    = $param['day'];
         $isDay  = $param['day'] - 1;
         $sign   = ShangGuService::getInstance()->getSignIn($this->player);
-        $startTimestamp = ShangGuService::getInstance()->getOpeningTime($this->player);
-        $resetInterval  = ConfigParam::getInstance()->getFmtParam('SHANGGUTOUZI_RESET_TIME') + 0;
-        $dayFrom        = ShangGuService::getInstance()->checkAndDay($startTimestamp,$resetInterval);
+
+        list($begin,$reset) = ConfigService::getInstance()->getActivityShanggu();
+        $dayFrom        = ShangGuService::getInstance()->checkAndDay($begin,$reset);
         $result         = '超出签到日期';
         if($day <= $dayFrom)
         {

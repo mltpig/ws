@@ -196,7 +196,7 @@ class MonsterInvadeBattleService
         unset($log['isFirst'], $log['hurt']);
 
 
-        $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
+        $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]['hp']) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
         $myHp = isset($selfLineup['list'][$selfLineup['battle']]) ? $selfLineup['list'][$selfLineup['battle']]['hp'] : 0;
         if ($log['ismy']) {
             $log['hp'] = ['self' => $myHp, 'enemy' => $enemyHp];
@@ -325,7 +325,7 @@ class MonsterInvadeBattleService
 
                     unset($log['isFirst'], $log['hurt']);
 
-                    $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
+                    $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]['hp']) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
                     $myHp = isset($selfLineup['list'][$selfLineup['battle']]) ? $selfLineup['list'][$selfLineup['battle']]['hp'] : 0;
 
                     $myStamina = isset($selfLineup['list'][$selfLineup['battle']]) ? $selfLineup['list'][$selfLineup['battle']]['stamina'] : 0;
@@ -423,7 +423,7 @@ class MonsterInvadeBattleService
             }
 
             //跳出战斗
-            if (!isset($selfLineup['list'][$selfLineup['battle']])) {
+            if (!isset($selfLineup['list'][$selfLineup['battle']]['hp']) ) {
                 $isContinue = false;
             }
 
@@ -580,7 +580,7 @@ class MonsterInvadeBattleService
 
         //释放兵法时
         if ($isAttackMagic) {
-            SkillService::getInstance()->triggerSkill($log, $selfSkill,  $selfBattleAttr,$enemyBattleAttr,
+            SkillService::getInstance()->triggerSkill($log, $selfSkill, $selfBattleAttr, $enemyBattleAttr,
                 $selfLineup['list'][$selfLineup['battle']], $enemyLineup['list'][$enemyLineup['battle']], 19);
         }
 
@@ -622,10 +622,10 @@ class MonsterInvadeBattleService
             MagicSkillService::getInstance()->addStaminaToAttacked($selfLineup['list'][$selfLineup['battle']], $log['hurt']['enemy']);
         }
         unset($log['hurt']);
-        $myHp = isset($selfLineup['list'][$selfLineup['battle']]) ? $selfLineup['list'][$selfLineup['battle']]['hp'] : 0;
-        $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
-        $myStamina = isset($selfLineup['list'][$selfLineup['battle']]) ? $selfLineup['list'][$selfLineup['battle']]['stamina'] : 0;
-        $enemyStamina = isset($enemyLineup['list'][$enemyLineup['battle']]) ? $enemyLineup['list'][$enemyLineup['battle']]['stamina'] : 0;
+        $myHp = isset($selfLineup['list'][$selfLineup['battle']]['hp']) ? $selfLineup['list'][$selfLineup['battle']]['hp'] : 0;
+        $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]['hp']) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
+        $myStamina = isset($selfLineup['list'][$selfLineup['battle']]['stamina']) ? $selfLineup['list'][$selfLineup['battle']]['stamina'] : 0;
+        $enemyStamina = isset($enemyLineup['list'][$enemyLineup['battle']]['stamina']) ? $enemyLineup['list'][$enemyLineup['battle']]['stamina'] : 0;
 
 
         $log['hp'] = ['self' => $myHp, 'enemy' => $enemyHp];
@@ -651,8 +651,8 @@ class MonsterInvadeBattleService
                     $selfType22Skill, $enemyType22Skill, $myAttackTriggerPet, $enemyAttackTriggerPet);
                 $isAttackBack = true;
             }
-            $myHp = isset($selfLineup['list'][$selfLineup['battle']]) ? $selfLineup['list'][$selfLineup['battle']]['hp'] : 0;
-            $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
+            $myHp = isset($selfLineup['list'][$selfLineup['battle']]['hp']) ? $selfLineup['list'][$selfLineup['battle']]['hp'] : 0;
+            $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]['hp']) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
             if (!$isDodge && !$isAttackBack && $myHp > 0 && $enemyHp > 0 && !isset($selfLineup['list'][$selfLineup['battle']]['debuff']['stun']) && !isset($selfLineup['list'][$selfLineup['battle']]['debuff']['freeze']) && $selfBattleAttr['double_attack'] >= rand(1, 1000)) {
                 if ($isAttackMagic) {
                     $isFirst = true;
@@ -667,8 +667,8 @@ class MonsterInvadeBattleService
             }
 
         }
-        $myHp = isset($selfLineup['list'][$selfLineup['battle']]) ? $selfLineup['list'][$selfLineup['battle']]['hp'] : 0;
-        $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
+        $myHp = isset($selfLineup['list'][$selfLineup['battle']]['hp']) ? $selfLineup['list'][$selfLineup['battle']]['hp'] : 0;
+        $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]['hp']) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
         //触发副将攻击
         if ($myHp > 0 && $enemyHp > 0 && $myMagicTriggerPet) {
             $log = $this->petAttack($tmp, $selfPet[0], 0, $selfSkill, $enemySkill, $selfRevive, $enemyRevive, $selfBattleAttr, $enemyBattleAttr, $selfLineup, $enemyLineup, $selfType22Skill, $selfTotalHurt);
@@ -852,8 +852,8 @@ class MonsterInvadeBattleService
         }
 
         if (!isset($selfLineup['list'][$selfLineup['battle']])) {
-            $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;;
-            $enemyStamina = isset($enemyLineup['list'][$enemyLineup['battle']]) ? $enemyLineup['list'][$enemyLineup['battle']]['stamina'] : 0;
+            $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]['hp']) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;;
+            $enemyStamina = isset($enemyLineup['list'][$enemyLineup['battle']]['stamina']) ? $enemyLineup['list'][$enemyLineup['battle']]['stamina'] : 0;
 
 
             $log['hp'] = ['self' => $enemyHp, 'enemy' => 0];
@@ -907,10 +907,10 @@ class MonsterInvadeBattleService
             MagicSkillService::getInstance()->addStaminaToAttacked($enemyLineup['list'][$enemyLineup['battle']], $log['hurt']['enemy']);
         }
         unset($log['hurt']);
-        $myHp = isset($selfLineup['list'][$selfLineup['battle']]) ? $selfLineup['list'][$selfLineup['battle']]['hp'] : 0;
-        $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
-        $myStamina = isset($selfLineup['list'][$selfLineup['battle']]) ? $selfLineup['list'][$selfLineup['battle']]['stamina'] : 0;
-        $enemyStamina = isset($enemyLineup['list'][$enemyLineup['battle']]) ? $enemyLineup['list'][$enemyLineup['battle']]['stamina'] : 0;
+        $myHp = isset($selfLineup['list'][$selfLineup['battle']]['hp']) ? $selfLineup['list'][$selfLineup['battle']]['hp'] : 0;
+        $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]['hp']) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
+        $myStamina = isset($selfLineup['list'][$selfLineup['battle']]['stamina']) ? $selfLineup['list'][$selfLineup['battle']]['stamina'] : 0;
+        $enemyStamina = isset($enemyLineup['list'][$enemyLineup['battle']]['stamina']) ? $enemyLineup['list'][$enemyLineup['battle']]['stamina'] : 0;
 
         $log['hp'] = ['self' => $enemyHp, 'enemy' => $myHp];
         $log['battle'] = ['self' => $enemyLineup['battle'], 'enemy' => $selfLineup['battle']];
@@ -1072,10 +1072,10 @@ class MonsterInvadeBattleService
             }
         }
         unset($log['hurt']);
-        $myHp = isset($selfLineup['list'][$selfLineup['battle']]) ? $selfLineup['list'][$selfLineup['battle']]['hp'] : 0;
-        $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
-        $myStamina = isset($selfLineup['list'][$selfLineup['battle']]) ? $selfLineup['list'][$selfLineup['battle']]['stamina'] : 0;
-        $enemyStamina = isset($enemyLineup['list'][$enemyLineup['battle']]) ? $enemyLineup['list'][$enemyLineup['battle']]['stamina'] : 0;
+        $myHp = isset($selfLineup['list'][$selfLineup['battle']]['hp']) ? $selfLineup['list'][$selfLineup['battle']]['hp'] : 0;
+        $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]['hp']) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
+        $myStamina = isset($selfLineup['list'][$selfLineup['battle']]['stamina']) ? $selfLineup['list'][$selfLineup['battle']]['stamina'] : 0;
+        $enemyStamina = isset($enemyLineup['list'][$enemyLineup['battle']]['stamina']) ? $enemyLineup['list'][$enemyLineup['battle']]['stamina'] : 0;
 
         $log['hp'] = ['self' => $myHp, 'enemy' => $enemyHp];
         $log['battle'] = ['self' => $selfLineup['battle'], 'enemy' => $enemyLineup['battle']];
@@ -1105,8 +1105,8 @@ class MonsterInvadeBattleService
                     $selfPet, $enemyPet, $selfRevive, $enemyRevive, $selfType22Skill, $enemyType22Skill, $myAttackTriggerPet, $enemyAttackTriggerPet);
                 $isAttackBack = true;
             }
-            $myHp = isset($selfLineup['list'][$selfLineup['battle']]) ? $selfLineup['list'][$selfLineup['battle']]['hp'] : 0;
-            $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
+            $myHp = isset($selfLineup['list'][$selfLineup['battle']]['hp'] ) ? $selfLineup['list'][$selfLineup['battle']]['hp'] : 0;
+            $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]['hp'] ) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
 
             if (!$isDodge && !$isAttackBack && $myHp > 0 && $enemyHp > 0 && !isset($selfLineup['list'][$selfLineup['battle']]['debuff']['stun']) && $doubleAttack >= rand(1, 1000)) {
                 //触发连击
@@ -1167,14 +1167,17 @@ class MonsterInvadeBattleService
         }
 
         $log['hurt'] = ['self' => 0, 'enemy' => 0];
+        if (in_array($petValue['id'], SkillService::PET_NO_ATTASK_SKILL_LIST)) {//副将每次攻击后触发技能
+            //133403, 133405 这两个只能攻击时触发
+            unset($selfSkill['magic'][133403]);
+            unset($selfSkill['magic'][133405]);
+        }
 
-        if (!in_array($petValue['id'], SkillService::PET_NO_ATTASK_SKILL_LIST)) {//副将每次攻击后触发技能
+        SkillService::getInstance()->triggerSkill($log, $selfSkill, $selfBattleAttr,
+            $enemyBattleAttr, $selfLineup['list'][$selfLineup['battle']], $enemyLineup['list'][$enemyLineup['battle']], 21);
+        if (MagicSkillService::getInstance()->isNegativeStatus($enemyLineup['list'][$enemyLineup['battle']])) {
             SkillService::getInstance()->triggerSkill($log, $selfSkill, $selfBattleAttr,
-                $enemyBattleAttr, $selfLineup['list'][$selfLineup['battle']], $enemyLineup['list'][$enemyLineup['battle']], 21);
-            if (MagicSkillService::getInstance()->isNegativeStatus($enemyLineup['list'][$enemyLineup['battle']])) {
-                SkillService::getInstance()->triggerSkill($log, $selfSkill, $selfBattleAttr,
-                    $enemyBattleAttr, $selfLineup['list'][$selfLineup['battle']], $enemyLineup['list'][$enemyLineup['battle']], 20);
-            }
+                $enemyBattleAttr, $selfLineup['list'][$selfLineup['battle']], $enemyLineup['list'][$enemyLineup['battle']], 20);
         }
 
 
@@ -1198,7 +1201,7 @@ class MonsterInvadeBattleService
         if ($log['hurt']['self'] > 0 && $enemyLineup['list'][$enemyLineup['battle']]['hp'] > 0) {
             $delList = [];
             $this->getDieMonster($enemyLineup, $log['hurt']['self'], $delList, $enemySkill);
-            $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
+            $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]['hp']) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
             if ($enemyHp <= 0 && $enemyRevive > 0 && (!isset($enemyLineup['list'][$enemyLineup['battle']]['debuff']['freeze']) || isset($enemySkill['magic'][133400]))) {
                 $log['extShanghaiData'][count($log['extShanghaiData']) - 1]['type'][] = BattleService::REVIVE;
             }
@@ -1215,7 +1218,7 @@ class MonsterInvadeBattleService
         }
         unset($log['hurt']);
 
-        $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
+        $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]['hp']) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
         $enemyStamina = isset($enemyLineup['list'][$enemyLineup['battle']]) ? $enemyLineup['list'][$enemyLineup['battle']]['stamina'] : 0;
         $log['hp'] = ['self' => $selfLineup['list'][$selfLineup['battle']]['hp'], 'enemy' => $enemyHp];
         $log['battle'] = ['self' => $selfLineup['battle'], 'enemy' => $enemyLineup['battle']];
@@ -1292,7 +1295,7 @@ class MonsterInvadeBattleService
 
 
         //释放兵法时
-        SkillService::getInstance()->triggerSkill($log, $selfSkill,  $selfBattleAttr,$enemyBattleAttr,
+        SkillService::getInstance()->triggerSkill($log, $selfSkill, $selfBattleAttr, $enemyBattleAttr,
             $selfLineup['list'][$selfLineup['battle']], $enemyLineup['list'][$enemyLineup['battle']], 19);
 
 
@@ -1334,10 +1337,10 @@ class MonsterInvadeBattleService
             MagicSkillService::getInstance()->addStaminaToAttacked($selfLineup['list'][$selfLineup['battle']], $log['hurt']['enemy']);
         }
         unset($log['hurt']);
-        $myHp = isset($selfLineup['list'][$selfLineup['battle']]) ? $selfLineup['list'][$selfLineup['battle']]['hp'] : 0;
-        $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
-        $myStamina = isset($selfLineup['list'][$selfLineup['battle']]) ? $selfLineup['list'][$selfLineup['battle']]['stamina'] : 0;
-        $enemyStamina = isset($enemyLineup['list'][$enemyLineup['battle']]) ? $enemyLineup['list'][$enemyLineup['battle']]['stamina'] : 0;
+        $myHp = isset($selfLineup['list'][$selfLineup['battle']]['hp']) ? $selfLineup['list'][$selfLineup['battle']]['hp'] : 0;
+        $enemyHp = isset($enemyLineup['list'][$enemyLineup['battle']]['hp']) ? $enemyLineup['list'][$enemyLineup['battle']]['hp'] : 0;
+        $myStamina = isset($selfLineup['list'][$selfLineup['battle']]['stamina']) ? $selfLineup['list'][$selfLineup['battle']]['stamina'] : 0;
+        $enemyStamina = isset($enemyLineup['list'][$enemyLineup['battle']]['stamina']) ? $enemyLineup['list'][$enemyLineup['battle']]['stamina'] : 0;
 
         $log['hp'] = ['self' => $myHp, 'enemy' => $enemyHp];
         $log['battle'] = ['self' => $selfLineup['battle'], 'enemy' => $enemyLineup['battle']];
